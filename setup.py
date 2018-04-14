@@ -10,6 +10,7 @@ setup(name='hogwild',
       version='0.0.1',
       install_requires=['pytest==2.9.2',
                         'grpcio==1.10.1',
-                        'grpcio-tools==1.10.1'],
+                        'grpcio-tools==1.10.1', 
+                        'numpy'],
       include_package_data=True,
       zip_safe=False)
