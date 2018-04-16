@@ -31,7 +31,7 @@ bash bootstrap-python-env.sh
 source activate hogwild-python
 ```
 
-All definitions about the coordinator address, nodes addresses and parameters related with SGD execution are in the file `settings.py`
+All definitions about the coordinator address, nodes addresses and parameters related with SGD execution are in the file `settings.py`. We assume that at least two workers will be started.
 
 To generate the proto classes (definition of message between nodes and coordinator), run the following command inside the hogwild folder:
 ```bash
