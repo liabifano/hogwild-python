@@ -2,6 +2,28 @@
 
 [HOGWILD!](https://arxiv.org/abs/1106.5730)
 
+The implementation consists in one coordinator and `n` working nodes. 
+
+For now, the responsibilities of coordinator node are:
+1. Split dataset in train / test
+2. Send to the nodes the entire train dataset and all nodes addresses 
+3. Listen intermediate result of working nodes
+4. After the working nodes' job is completed, will compute aggregate the computation and calculate the model's performance in the test dataset.
+
+The responsibilities of the working nodes are:
+1. Receive the dataset and send message to all others nodes and to coordinator that its is ready to start the computations.
+2. Wait until all others nodes are ready to start the computations
+3. Performance `epoch` computation
+4. Send to all others nodes the result and that its is ready to start another `epoch`
+5. Wait until all others nodes are ready to start another `epoch`
+6. Send the final result to coordinator node
+
+In summary:
+
+<img src="resources/temp_schema_comunication.jpeg"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px;" />
+
 
 ## Configurations and setup
 To build the python environment and activate it run: 
@@ -48,4 +70,6 @@ python src/hogwild/coordinator.py
 ## TODOs:
 - shell script to spin all nodes and coordinator
 - write unit tests 
+- write documentation
+- control / recovery of failures
 - asynchronous version 
