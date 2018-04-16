@@ -1,4 +1,4 @@
-import settings
+from hogwild import settings
 
 def generate_dictionary(datapoint):
     d = {0: 1.0} # for the bias

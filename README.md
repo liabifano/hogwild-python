@@ -3,6 +3,8 @@
 [HOGWILD!](https://arxiv.org/abs/1106.5730)
 
 The implementation consists in one coordinator and `n` working nodes. 
+As the dataset is constant, fits in the node memory and it will be required to be accessed by all the nodes multiple times (for each epoch), it will be sent to every node in the beginning of the job.
+Each epoch is one interaction of a SGD over a random subsample of the dataset.
 
 For now, the responsibilities of coordinator node are:
 1. Split dataset in train / test
@@ -20,10 +22,7 @@ The responsibilities of the working nodes are:
 
 In summary:
 
-<img src="resources/temp_schema_comunication.jpeg"
-     alt="Markdown Monster icon"
-     style="float: left; margin-right: 10px;" />
-
+![stack](/resources/temp_schema_comunication.JPG)
 
 ## Configurations and setup
 To build the python environment and activate it run: 
@@ -59,13 +58,32 @@ Open `n+1` terminals where `n` is the number of nodes. First run each node with 
 source activate hogwild-python 
 python src/hogwild/nodes.py 50052
 ```
-ps: make sure that the file `setting.py` has the right ports and addresses
+> **NOTE** make sure that the file `setting.py` has the right ports and addresses
 
 Then run the coordinator:
 ```bash
 source activate hogwild-python 
 python src/hogwild/coordinator.py
 ```
+
+## Considerations about Synchronous execution
+ 
+`n` = # number of nodes
+
+`eps` = # number of epochs
+
+As the dataset is constant, fits in the memory of each node and it will be required to be accessed by all the nodes multiple times (for epoch)
+
+- **What is the data that is constant?**
+Entire dataset.
+
+- **How much data is send?**
+For each epoch, each node sends a dictionary with average 75 values (non-null entries) to all others nodes.
+So the total amount is about 75\*n\*(n+1)*ep.
+
+- **How many messages are sent trough the network?**
+For each epoch n\*(n+1), which is quadratic in relation the number of nodes.
+As we don't expect a large number of nodes and all of them are the same geographical regions (distance latency is small), then this is not a huge problem.
 
 ## TODOs:
 - shell script to spin all nodes and coordinator
