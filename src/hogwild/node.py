@@ -3,10 +3,8 @@ import random
 import sys
 from concurrent import futures
 
-# Import the automatically generated classes
-import hogwild_pb2
-import hogwild_pb2_grpc
-from svm import SVM
+from hogwild import hogwild_pb2, hogwild_pb2_grpc
+from hogwild.svm import SVM
 
 
 # Create a class to define the server functions

@@ -25,10 +25,14 @@ cd src/hogwild & python -m grpc_tools.protoc -I. --python_out=. --grpc_python_ou
 ```
 If you made any change in the file `.proto`, you must generate the classes again
 
-
+## Run tests
+```bash
+source activate hogwild-python 
+py.test --color=yes -v
+```
 
 ## Synchronous execution
-Open n+1 terminals where n is the number of nodes. First run each node with the selected port number as an argument. Eg:
+Open `n+1` terminals where `n` is the number of nodes. First run each node with the selected port number as an argument. Eg:
 ```bash
 source activate hogwild-python 
 python src/hogwild/nodes.py 50052
@@ -41,8 +45,7 @@ source activate hogwild-python
 python src/hogwild/coordinator.py
 ```
 
-#### Run tests
-```bash
-source activate hogwild-python 
-py.test --color=yes -v
-```
+## TODOs:
+- shell script to spin all nodes and coordinator
+- write unit tests 
+- asynchronous version 

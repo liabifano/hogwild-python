@@ -3,14 +3,10 @@ import random
 import time
 from concurrent import futures
 
-# Import the automatically generated classes
-import hogwild_pb2
-import hogwild_pb2_grpc
-import ingest_data
-import settings as s
-import utils
-from node import HogwildServicer
-from svm import SVM
+from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data, utils
+from hogwild import settings as s
+from hogwild.node import HogwildServicer
+from hogwild.svm import SVM
 
 if __name__ == '__main__':
 
