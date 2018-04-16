@@ -15,4 +15,4 @@ learning_rate = 1
 test_percentage = 0.1
 epochs = 100
 batch_size = 100
-lambda_reg=1e-5
+lambda_reg = 1e-5

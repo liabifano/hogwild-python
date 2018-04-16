@@ -1,4 +1,4 @@
-from utils import dotproduct, sign
+from hogwild.utils import dotproduct, sign
 
 
 class SVM:

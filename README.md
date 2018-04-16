@@ -44,5 +44,5 @@ python src/hogwild/coordinator.py
 #### Run tests
 ```bash
 source activate hogwild-python 
-py.test --color=yes
+py.test --color=yes -v
 ```
