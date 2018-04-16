@@ -20,7 +20,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.learning_rate = 0
         self.lambda_reg = 0
         self.epochs = 0
-        self.batch_size = 0
+        self.subset_size = 0
 
         self.dataset_received = False
         self.ready_to_calculate = False
@@ -60,7 +60,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.learning_rate = request.learning_rate
         self.lambda_reg = request.lambda_reg
         self.epochs = request.epochs
-        self.batch_size = request.batch_size
+        self.subset_size = request.subset_size
         dim = max([max(k) for k in self.data]) + 1
         self.svm = SVM(learning_rate=self.learning_rate, lambda_reg=self.lambda_reg, dim=dim)
         self.ready_to_calculate = True
@@ -113,10 +113,10 @@ if __name__ == "__main__":
         epoch = 1
         while epoch < hws.epochs:
             print('Epoch {}'.format(epoch))
-            # Select random minibatch and calculate weight updates for it
-            batch_indices = random.sample(range(len(hws.targets)), hws.batch_size)
-            data_stoc = [hws.data[x] for x in batch_indices]
-            targets_stoc = [hws.targets[x] for x in batch_indices]
+            # Select random subset and calculate weight updates for it
+            subset_indices = random.sample(range(len(hws.targets)), hws.subset_size)
+            data_stoc = [hws.data[x] for x in subset_indices]
+            targets_stoc = [hws.targets[x] for x in subset_indices]
             total_delta_w = hws.svm.fit(data_stoc, targets_stoc)
             # Send weight updates to all other nodes
             for stub in hws.stubs.values():

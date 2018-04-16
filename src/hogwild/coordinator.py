@@ -69,7 +69,7 @@ if __name__ == '__main__':
         start = hogwild_pb2.StartMessage(learning_rate=s.learning_rate,
                                          lambda_reg=s.lambda_reg,
                                          epochs=s.epochs,
-                                         batch_size=s.batch_size)
+                                         subset_size=s.subset_size)
         response = stub.StartSGD(start)
     print('Start message sent to all nodes. SGD running...')
 

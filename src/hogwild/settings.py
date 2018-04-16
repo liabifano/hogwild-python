@@ -14,5 +14,5 @@ node_addresses = ['localhost:50052', 'localhost:50053']
 learning_rate = 1
 test_percentage = 0.1
 epochs = 100
-batch_size = 100
+subset_size = 100
 lambda_reg = 1e-5

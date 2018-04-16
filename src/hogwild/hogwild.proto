@@ -19,7 +19,7 @@ message StartMessage {
     float learning_rate = 1;
     float lambda_reg = 2;
     int32 epochs = 3;
-    int32 batch_size = 4;
+    int32 subset_size = 4;
 }
 
 message WeightUpdate {
