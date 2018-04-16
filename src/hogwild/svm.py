@@ -1,5 +1,6 @@
 from utils import dotproduct, sign
 
+
 class SVM:
     def __init__(self, learning_rate, lambda_reg, dim):
         self.__learning_rate = learning_rate
@@ -29,7 +30,7 @@ class SVM:
             else:
                 delta_w = self.__regularization_gradient(x)
                 self.update_weights(delta_w)
-            for k,v in delta_w.items():
+            for k, v in delta_w.items():
                 if k in total_delta_w:
                     total_delta_w[k] += v
                 else:

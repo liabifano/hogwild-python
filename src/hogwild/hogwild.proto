@@ -1,8 +1,6 @@
 syntax = "proto3";
 
-message Empty {
-
-}
+message Empty {}
 
 message NetworkInfo {
     string coordinator_address = 1;
@@ -28,19 +26,15 @@ message WeightUpdate {
     map<int32, float> delta_w = 1;
 }
 
-message ReadyToGo {
+message ReadyToGo {}
 
-}
-
-message EpochsDone {
-
-}
+message EpochsDone {}
 
 service Hogwild {
-    rpc GetNodeInfo(NetworkInfo) returns (Empty) {}
-    rpc GetDataSet(DataSet) returns (Empty) {}
-    rpc StartSGD(StartMessage) returns (Empty) {}
-    rpc GetWeightUpdate(WeightUpdate) returns (Empty) {}
-    rpc GetReadyToGo(ReadyToGo) returns (Empty) {}
-    rpc GetEpochsDone(EpochsDone) returns (Empty) {}
+    rpc GetNodeInfo (NetworkInfo) returns (Empty) {}
+    rpc GetDataSet (DataSet) returns (Empty) {}
+    rpc StartSGD (StartMessage) returns (Empty) {}
+    rpc GetWeightUpdate (WeightUpdate) returns (Empty) {}
+    rpc GetReadyToGo (ReadyToGo) returns (Empty) {}
+    rpc GetEpochsDone (EpochsDone) returns (Empty) {}
 }

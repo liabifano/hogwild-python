@@ -1,7 +1,7 @@
 import settings
 
 def generate_dictionary(datapoint):
-    d = {0: 1.0} # bias
+    d = {0: 1.0} # for the bias
     for elem in datapoint:
         elem = elem.split(':')
         d[int(elem[0])] = float(elem[1])

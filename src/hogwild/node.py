@@ -1,18 +1,17 @@
-from svm import SVM
 import grpc
-from concurrent import futures
-import time
-import sys
 import random
+import sys
+from concurrent import futures
 
 # Import the automatically generated classes
 import hogwild_pb2
 import hogwild_pb2_grpc
+from svm import SVM
+
 
 # Create a class to define the server functions
 # derived from hogwild_pb2_grpc.HogwildServicer
 class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
-
     def __init__(self):
         self.coordinator_address = ''
         self.node_addresses = []
@@ -71,7 +70,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         return response
 
     def GetWeightUpdate(self, request, context):
-        for k,v in dict(request.delta_w).items():
+        for k, v in dict(request.delta_w).items():
             if k in self.all_delta_w:
                 self.all_delta_w[k] += v
             else:
@@ -90,12 +89,13 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         response = hogwild_pb2.Empty()
         return response
 
+
 if __name__ == "__main__":
     # Create a gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),\
-                         options=[('grpc.max_message_length',1024*1024*1024),\
-                                  ('grpc.max_send_message_length',1024*1024*1024),\
-                                  ('grpc.max_receive_message_length',1024*1024*1024)])
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), \
+                         options=[('grpc.max_message_length', 1024 * 1024 * 1024), \
+                                  ('grpc.max_send_message_length', 1024 * 1024 * 1024), \
+                                  ('grpc.max_receive_message_length', 1024 * 1024 * 1024)])
 
     # Use the generated function `add_HogwildServicer_to_server`
     # to add the defined class to the created server
