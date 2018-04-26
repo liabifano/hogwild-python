@@ -24,10 +24,12 @@ if __name__ == '__main__':
     data_test = [data[x] for x in test_indices]
     targets_test = [targets[x] for x in test_indices]
 
+    data_split = utils.split_dataset(data_train, targets_train, len(s.node_addresses))
+
     # Step 2: Startup the nodes
     # addresses of all nodes and coordinator and the dataset to all worker nodes
     stubs = {}
-    for node_addr in s.node_addresses:
+    for i, node_addr in enumerate(s.node_addresses):
         # Open a gRPC channel
         channel = grpc.insecure_channel(node_addr, options=[('grpc.max_message_length', 1024 * 1024 * 1024), \
                                                             ('grpc.max_send_message_length', 1024 * 1024 * 1024), \
@@ -43,7 +45,8 @@ if __name__ == '__main__':
         # Send the whole dataset to all the workers
         print('Sending dataset to node at {}'.format(node_addr))
         dataset = hogwild_pb2.DataSet()
-        for dp, t in zip(data_train, targets_train):
+
+        for dp, t in data_split[i]:
             dp_i = dataset.datapoints.add()
             for k, v in dp.items():
                 dp_i.datapoint[k] = v

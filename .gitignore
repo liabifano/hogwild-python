@@ -108,3 +108,5 @@ venv.bak/
 
 rcv1rcv2aminigoutte
 *.bz2
+
+*.idea
