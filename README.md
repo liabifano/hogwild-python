@@ -88,6 +88,11 @@ On the other hand, the nodes will move on with their computation without checkin
 Another idea to reduce the number of comunication in the network is have a cached database in the server node which stores all messages in a queue and the nodes send the weights updates and consultes the same database to get the last weigths updates stored. However the database troughtput might be a bottleneck.
 
 ## TODOs:
-- [ ] Shell script to spin all nodes and coordinator
+- [ ] Dockerize things
+- [ ] Deploy in Kubernetes
+- [ ] Fix sync: change Coordinator rule to syncronize everyone
+- [ ] Put epoch number in each message 
+- [ ] Stop Criterion based in loss
+- [ ] Multithreading in the nodes
 - [ ] Write unit tests
 - [ ] Asynchronous HOGWILD! like version

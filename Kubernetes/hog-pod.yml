@@ -1,0 +1,51 @@
+# TODO: think about how to generate this automatically
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hogwild
+  labels:
+    name: hogwild
+spec:
+  containers:
+    - name: coordinator
+#      args:
+#      command:
+#      env:
+#        -
+#          name: ""
+#          value: ""
+#      imagePullPolicy: ""
+      image: hogwild/coordinator
+      ports:
+        - containerPort: 50051
+    - name: node50052
+#      args:
+#      command:
+#      env:
+#        -
+#          name: ""
+#          value: ""
+#      imagePullPolicy: ""
+      image: hogwild/node50052
+      ports:
+        - containerPort: 50052
+    - name: node50053
+    #      args:
+    #      command:
+    #      env:
+    #        -
+    #          name: ""
+    #          value: ""
+    #      imagePullPolicy: ""
+          image: hogwild/node50053
+          ports:
+            - containerPort: 50053
+  restartPolicy: always
+
+  volumes:
+    -
+      emptyDir:
+        medium: ""
+      name: ""
+      secret:
+        secretName: cs449g9-scratch
