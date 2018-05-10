@@ -3,39 +3,28 @@ version: '3.5'
 services:
   node1:
     build:
-      context: ../..
-      shm_size: '2gb'
+      context: ../
       dockerfile: ./Docker/node/Dockerfile
     restart: always
     image: hogwild/node1
-    volumes:
-      - node1_data:/var/lib/node1
     environment:
-      - PORT=50012 # be careful and fix it in the package
+      - PORT=50052 # be careful and fix it in the package
   node2:
       build:
-        context: ../..
-        shm_size: '2gb'
-        dockerfile: ./Docker/node/Dockerfile
+        context: ../
+        dockerfile: ./Docker/node/Dockerfile/
       restart: always
       image: hogwild/node2
-      volumes:
-        - node2_data:/var/lib/node2
       environment:
-        - PORT=50013
+        - PORT=50053
 
   coordinator:
     build:
-      context: ../..
+      context: ../
       dockerfile: ./Docker/coordinator/Dockerfile
     restart: always
     image: hogwild/coordinator
     command:
       - --loglevel warning
-    volumes:
-      - coordinator_data:/var/lib/coordinator
-
-volumes:
-  coordinator_data: {}
-  node1_data: {}
-  node2_data: {}
+    environment:
+      - PORT=50051

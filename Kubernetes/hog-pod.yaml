@@ -15,7 +15,7 @@ spec:
 #          name: ""
 #          value: ""
 #      imagePullPolicy: ""
-      image: hogwild/coordinator
+      image: hogwild_coordinator
       ports:
         - containerPort: 50051
     - name: node50052
@@ -26,7 +26,7 @@ spec:
 #          name: ""
 #          value: ""
 #      imagePullPolicy: ""
-      image: hogwild/node50052
+      image: hogwild_node50052
       ports:
         - containerPort: 50052
     - name: node50053
@@ -37,15 +37,15 @@ spec:
     #          name: ""
     #          value: ""
     #      imagePullPolicy: ""
-          image: hogwild/node50053
-          ports:
-            - containerPort: 50053
-  restartPolicy: always
+      image: hogwild_node50053
+      ports:
+        - containerPort: 50053
+#  restartPolicy: always
 
-  volumes:
-    -
-      emptyDir:
-        medium: ""
-      name: ""
-      secret:
-        secretName: cs449g9-scratch
+#  volumes:
+#    -
+#      emptyDir:
+#        medium: ""
+#      name: ""
+#      secret:
+#        secretName: cs449g9-scratch
