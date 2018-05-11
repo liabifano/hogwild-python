@@ -37,16 +37,28 @@ class SVM:
                     total_delta_w[k] = v
         return total_delta_w
 
+    def __loss(self, data, labels):
+        total_loss = 0
+        for x, label in zip(data, labels):
+            wx = dotproduct(x, self.__w)
+            total_loss += max(1 - label * wx, 0)
+            total_loss += __regularizer(x)
+        return total_loss
+
     def __regularizer(self, x):
+        w = self.__getW()
+        return self.__getRegLambda() * sum([w[i]**2 for i in x.keys()]) / len(x)
+
+    def __regularizer_g(self, x):
         w = self.__getW()
         return 2 * self.__getRegLambda() * sum([w[i] for i in x.keys()]) / len(x)
 
     def __gradient(self, x, label):
-        regularizer = self.__regularizer(x)
+        regularizer = self.__regularizer_g(x)
         return {k: (v * label - regularizer) for k, v in x.items()}
 
     def __regularization_gradient(self, x):
-        regularizer = self.__regularizer(x)
+        regularizer = self.__regularizer_g(x)
         return {k: regularizer for k in x.keys()}
 
     def __misclassification(self, x, label):

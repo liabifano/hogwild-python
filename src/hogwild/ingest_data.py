@@ -7,15 +7,56 @@ def generate_dictionary(datapoint):
         d[int(elem[0])] = float(elem[1])
     return d
 
-def load_reuters_data():
+def load_small_reuters_data():
     data = []
     labels = []
-
-    with open(settings.DATA_PATH) as f:
+    with open(settings.RC_SMALL_TRAIN_PATH) as f:
         content = f.readlines()
         content = [line.strip() for line in content]
         content = [line.split(' ') for line in content]
         labels = [line[0] for line in content]
         data = [generate_dictionary(line[1:]) for line in content]
-
     return data, labels
+
+def load_large_reuters_data(selected_cat='CCAT', train=True):
+    data = []
+    labels = []
+    if train:
+        with open(settings.RC_LARGE_TRAIN_PATH) as f:
+            content = f.readlines()
+            content = [line.strip() for line in content]
+            content = [line.split(' ') for line in content]
+            labels = [int(line[0]) for line in content]
+            data = [generate_dictionary(line[2:]) for line in content]
+    else:
+        paths = [settings.RC_LARGE_TEST_PATH0, settings.RC_LARGE_TEST_PATH1,
+                 settings.RC_LARGE_TEST_PATH2, settings.RC_LARGE_TEST_PATH3]
+        for path in paths:
+            with open(path) as f:
+                content = f.readlines()
+                content = [line.strip() for line in content]
+                content = [line.split(' ') for line in content]
+                labels_i = [int(line[0]) for line in content]
+                data_i = [generate_dictionary(line[2:]) for line in content]
+                labels = labels + labels_i
+                data = data + data_i
+    cat = get_category_dict()
+    labels = [1 if selected_cat in cat[label] else -1 for label in labels]
+    return data, labels
+
+def get_category_dict():
+    categories = {}
+    with open(settings.RC_LARGE_LABELS_PATH) as f:
+        content = f.readlines()
+        content = [line.strip() for line in content]
+        content = [line.split(' ') for line in content]
+        for line in content:
+            id = int(line[1])
+            cat = line[0]
+            if id not in categories:
+                categories[id] = [cat]
+            else:
+                categories[id].append(cat)
+    return categories
+
+a,b = load_large_reuters_data()

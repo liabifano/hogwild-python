@@ -11,19 +11,21 @@ from hogwild.svm import SVM
 if __name__ == '__main__':
 
     # Step 1: Load the data from the reuters dataset and create targets
-    print('Data path:', s.DATA_PATH)
-    data, labels = ingest_data.load_reuters_data()
+    print('Data path:', s.RC_SMALL_TRAIN_PATH)
+    data, labels = ingest_data.load_small_reuters_data()
     targets = [1 if x in ['ECAT', 'CCAT', 'M11'] else -1 for x in labels]
     print('Number of datapoints: {}'.format(len(targets)))
     print('Labels: {}'.format(set(labels)))
 
-    # Split into train and test datasets
-    test_indices = random.sample(range(len(targets)), int(0.1 * len(targets)))
-    data_train = [data[x] for x in range(len(targets)) if x not in test_indices]
-    targets_train = [targets[x] for x in range(len(targets)) if x not in test_indices]
-    data_test = [data[x] for x in test_indices]
-    targets_test = [targets[x] for x in test_indices]
+    # Split into train and validation datasets
+    validation_split = 0.1
+    val_indices = random.sample(range(len(targets)), int(validation_split * len(targets)))
+    data_train = [data[x] for x in range(len(targets)) if x not in val_indices]
+    targets_train = [targets[x] for x in range(len(targets)) if x not in val_indices]
+    data_val = [data[x] for x in val_indices]
+    targets_val = [targets[x] for x in val_indices]
 
+    # Divide data among all nodes evenly
     data_split = utils.split_dataset(data_train, targets_train, len(s.node_addresses))
 
     # Step 2: Startup the nodes
@@ -45,7 +47,6 @@ if __name__ == '__main__':
         # Send the whole dataset to all the workers
         print('Sending dataset to node at {}'.format(node_addr))
         dataset = hogwild_pb2.DataSet()
-
         for dp, t in data_split[i]:
             dp_i = dataset.datapoints.add()
             for k, v in dp.items():
@@ -85,14 +86,14 @@ if __name__ == '__main__':
         hws.svm = SVM(learning_rate=s.learning_rate, lambda_reg=s.lambda_reg, dim=dim)
 
         hws.svm.update_weights(hws.all_delta_w)
-        prediction = hws.svm.predict(data_test)
-        a = sum([1 for x in zip(targets_test, prediction) if x[0] == 1 and x[1] == 1])
-        b = sum([1 for x in targets_test if x == 1])
-        print('Test accuracy of Label 1: {:.2f}%'.format(a / b))
+        prediction = hws.svm.predict(data_val)
+        a = sum([1 for x in zip(targets_val, prediction) if x[0] == 1 and x[1] == 1])
+        b = sum([1 for x in targets_val if x == 1])
+        print('Val accuracy of Label 1: {:.2f}%'.format(a / b))
 
-        c = sum([1 for x in zip(targets_test, prediction) if x[0] == -1 and x[1] == -1])
-        d = sum([1 for x in targets_test if x == -1])
-        print('Test accuracy of Label -1: {:.2f}%'.format(c / d))
-        print('Test accuracy: {:.2f}%'.format(utils.accuracy(targets_test, prediction)))
+        c = sum([1 for x in zip(targets_val, prediction) if x[0] == -1 and x[1] == -1])
+        d = sum([1 for x in targets_val if x == -1])
+        print('Val accuracy of Label -1: {:.2f}%'.format(c / d))
+        print('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
     except KeyboardInterrupt:
         server.stop(0)
