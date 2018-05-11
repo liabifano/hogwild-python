@@ -8,39 +8,20 @@ metadata:
 spec:
   containers:
     - name: coordinator
-#      args:
-#      command:
-#      env:
-#        -
-#          name: ""
-#          value: ""
-#      imagePullPolicy: ""
-      image: hogwild_coordinator
+      image: liabifano/hogwild_coordinator:latest
       ports:
         - containerPort: 50051
     - name: node50052
-#      args:
-#      command:
-#      env:
-#        -
-#          name: ""
-#          value: ""
-#      imagePullPolicy: ""
-      image: hogwild_node50052
+      image: liabifano/hogwild_node:latest
       ports:
         - containerPort: 50052
+      command: ["python", "hogwild-python/src/hogwild/node.py", "50052"]
     - name: node50053
-    #      args:
-    #      command:
-    #      env:
-    #        -
-    #          name: ""
-    #          value: ""
-    #      imagePullPolicy: ""
-      image: hogwild_node50053
+      image: liabifano/hogwild_node:latest
       ports:
         - containerPort: 50053
-#  restartPolicy: always
+      command: ["python", "hogwild-python/src/hogwild/node.py", "50053"]
+
 
 #  volumes:
 #    -
