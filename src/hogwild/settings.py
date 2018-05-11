@@ -31,8 +31,8 @@ coordinator_port = '50051'
 coordinator_address = 'localhost:{}'.format(coordinator_port)
 node_addresses = ['localhost:50052', 'localhost:50053']
 
-learning_rate = 1
+learning_rate = 0.01
 test_percentage = 0.1
-epochs = 100
+epochs = 1000
 subset_size = 100
 lambda_reg = 1e-5

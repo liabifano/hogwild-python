@@ -11,11 +11,12 @@ from hogwild.svm import SVM
 if __name__ == '__main__':
 
     # Step 1: Load the data from the reuters dataset and create targets
-    print('Data path:', s.RC_SMALL_TRAIN_PATH)
-    data, labels = ingest_data.load_small_reuters_data()
-    targets = [1 if x in ['ECAT', 'CCAT', 'M11'] else -1 for x in labels]
+    # print('Data path:', s.RC_SMALL_TRAIN_PATH)
+    # data, labels = ingest_data.load_small_reuters_data()
+    # targets = [1 if x in ['ECAT', 'CCAT', 'M11'] else -1 for x in labels]
+    print('Data path:', s.RC_LARGE_TRAIN_PATH)
+    data, targets = ingest_data.load_large_reuters_data(selected_cat='CCAT', train=True)
     print('Number of datapoints: {}'.format(len(targets)))
-    print('Labels: {}'.format(set(labels)))
 
     # Split into train and validation datasets
     validation_split = 0.1
