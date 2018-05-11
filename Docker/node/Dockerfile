@@ -8,4 +8,4 @@ COPY conda.txt setup.py run-local.sh /hogwild-python/
 
 RUN cd /hogwild-python/ && pip install -e .
 
-CMD python src/hogwild/node.py ${PORT}
+#CMD python hogwild-python/src/hogwild/node.py ${PORT}
