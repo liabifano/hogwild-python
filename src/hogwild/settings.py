@@ -31,8 +31,12 @@ coordinator_port = '50051'
 coordinator_address = 'localhost:{}'.format(coordinator_port)
 node_addresses = ['localhost:50052', 'localhost:50053']
 
-learning_rate = 0.01
-test_percentage = 0.1
-epochs = 1000
-subset_size = 100
-lambda_reg = 1e-5
+# TODO: Temporary. Set flag with startup...
+synchronous = True # Synchronous or asynchronous mode selection
+
+learning_rate = 0.01 # Learning rate for SGD
+validation_split = 0.1 # Percentage of validation data
+epochs = 1000 # Number of training iterations over subset on each node
+persistence = 20 # Abort if after so many epochs learning rate does not decrease
+subset_size = 100 # Number of datapoints to train on each epoch
+lambda_reg = 1e-5 # Regularization parameter

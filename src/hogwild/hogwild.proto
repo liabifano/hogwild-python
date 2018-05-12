@@ -20,6 +20,7 @@ message StartMessage {
     float lambda_reg = 2;
     int32 epochs = 3;
     int32 subset_size = 4;
+    int32 dim = 5;
 }
 
 message WeightUpdate {
@@ -33,6 +34,7 @@ message EpochsDone {}
 service Hogwild {
     rpc GetNodeInfo (NetworkInfo) returns (Empty) {}
     rpc GetDataSet (DataSet) returns (Empty) {}
+    rpc GetValidationSet (DataSet) returns (Empty) {}
     rpc StartSGD (StartMessage) returns (Empty) {}
     rpc GetWeightUpdate (WeightUpdate) returns (Empty) {}
     rpc GetReadyToGo (ReadyToGo) returns (Empty) {}

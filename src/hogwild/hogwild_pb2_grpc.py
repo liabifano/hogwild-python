@@ -24,6 +24,11 @@ class HogwildStub(object):
         request_serializer=hogwild__pb2.DataSet.SerializeToString,
         response_deserializer=hogwild__pb2.Empty.FromString,
         )
+    self.GetValidationSet = channel.unary_unary(
+        '/Hogwild/GetValidationSet',
+        request_serializer=hogwild__pb2.DataSet.SerializeToString,
+        response_deserializer=hogwild__pb2.Empty.FromString,
+        )
     self.StartSGD = channel.unary_unary(
         '/Hogwild/StartSGD',
         request_serializer=hogwild__pb2.StartMessage.SerializeToString,
@@ -58,6 +63,13 @@ class HogwildServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def GetDataSet(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetValidationSet(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -102,6 +114,11 @@ def add_HogwildServicer_to_server(servicer, server):
       ),
       'GetDataSet': grpc.unary_unary_rpc_method_handler(
           servicer.GetDataSet,
+          request_deserializer=hogwild__pb2.DataSet.FromString,
+          response_serializer=hogwild__pb2.Empty.SerializeToString,
+      ),
+      'GetValidationSet': grpc.unary_unary_rpc_method_handler(
+          servicer.GetValidationSet,
           request_deserializer=hogwild__pb2.DataSet.FromString,
           response_serializer=hogwild__pb2.Empty.SerializeToString,
       ),

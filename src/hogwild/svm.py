@@ -20,16 +20,18 @@ class SVM:
     def __getW(self):
         return self.__w
 
-    def fit(self, data, labels):
+    def fit(self, data, labels, update=True):
         total_delta_w = {}
 
         for x, label in zip(data, labels):
             if self.__misclassification(x, label):
                 delta_w = self.__gradient(x, label)
-                self.update_weights(delta_w)
+                if update:
+                    self.update_weights(delta_w)
             else:
                 delta_w = self.__regularization_gradient(x)
-                self.update_weights(delta_w)
+                if update:
+                    self.update_weights(delta_w)
             for k, v in delta_w.items():
                 if k in total_delta_w:
                     total_delta_w[k] += v
@@ -37,12 +39,12 @@ class SVM:
                     total_delta_w[k] = v
         return total_delta_w
 
-    def __loss(self, data, labels):
+    def loss(self, data, labels):
         total_loss = 0
         for x, label in zip(data, labels):
             wx = dotproduct(x, self.__w)
             total_loss += max(1 - label * wx, 0)
-            total_loss += __regularizer(x)
+            total_loss += self.__regularizer(x)
         return total_loss
 
     def __regularizer(self, x):
