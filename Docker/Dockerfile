@@ -4,8 +4,6 @@ RUN python3 -m pip install pip --upgrade
 
 
 COPY src /hogwild-python/src/
-COPY conda.txt setup.py run-local.sh /hogwild-python/
+COPY conda.txt setup.py /hogwild-python/
 
 RUN cd /hogwild-python/ && pip install -e .
-
-#CMD python hogwild-python/src/hogwild/node.py ${PORT}

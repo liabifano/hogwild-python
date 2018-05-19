@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coordinator-service
+  labels:
+    app: coordinator-service
+spec:
+  ports:
+  - port: 80
+    name: coordinator
+  clusterIP: None
+  selector:
+    app: coordinator-service
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: coordinator
+  labels:
+    app: coordinator-service
+spec:
+  serviceName: "coordinator-service"
+  selector:
+    matchLabels:
+      app: coordinator-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: coordinator-service
+    spec:
+      containers:
+      - name: coordinator-service
+        image: liabifano/hogwild:latest
+        ports:
+        - containerPort: 80
+          name: coordinator
+        command: ["python", "hogwild-python/src/hogwild/coordinator.py", "80"]
+        env:
+        - name: N_WORKERS
+          value: "5"
+        volumeMounts:
+            - name: shared-volume
+              mountPath: /data
+      volumes:
+        - name: shared-volume
+          persistentVolumeClaim:
+            claimName: cs449g9-scratch
