@@ -3,6 +3,7 @@ import random
 import sys
 from concurrent import futures
 import settings as s
+from threading import Lock
 
 from hogwild import hogwild_pb2, hogwild_pb2_grpc
 from hogwild.svm import SVM
@@ -18,22 +19,21 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
 
         self.data = []
         self.targets = []
-        self.val_data = []
-        self.val_targets = []
         self.learning_rate = 0
         self.lambda_reg = 0
         self.epochs = 0
         self.subset_size = 0
 
         self.dataset_received = False
-        self.val_dataset_received = False
         self.ready_to_calculate = False
         self.svm = None
         self.all_delta_w = {}
+        self.weight_lock = Lock()
         self.wait_for_all_nodes_counter = 0
 
         self.ready_to_go_counter = 0
         self.epochs_done = 0
+        self.stop_msg_received = False
 
     def GetNodeInfo(self, request, context):
         print('Received node network information!')
@@ -60,18 +60,6 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         response = hogwild_pb2.Empty()
         return response
 
-    def GetValidationSet(self, request, context):
-        datapoints = request.datapoints
-        for d in datapoints:
-            self.val_data.append(dict(d.datapoint))
-            self.val_targets.append(d.target)
-        print('Received validation dataset!')
-        print('Validation dataset length = {}'.format(len(self.val_data)))
-        print('Validation targets length = {}'.format(len(self.val_targets)))
-        self.val_dataset_received = True
-        response = hogwild_pb2.Empty()
-        return response
-
     def StartSGD(self, request, context):
         self.learning_rate = request.learning_rate
         self.lambda_reg = request.lambda_reg
@@ -84,12 +72,13 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         return response
 
     def GetWeightUpdate(self, request, context):
-        for k, v in dict(request.delta_w).items():
-            if k in self.all_delta_w:
-                self.all_delta_w[k] += v
-            else:
-                self.all_delta_w[k] = v
-        self.wait_for_all_nodes_counter += 1
+        with self.weight_lock:
+            for k, v in dict(request.delta_w).items():
+                if k in self.all_delta_w:
+                    self.all_delta_w[k] += v
+                else:
+                    self.all_delta_w[k] = v
+            self.wait_for_all_nodes_counter += 1
         response = hogwild_pb2.Empty()
         return response
 
@@ -100,6 +89,11 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
 
     def GetEpochsDone(self, request, context):
         self.epochs_done += 1
+        response = hogwild_pb2.Empty()
+        return response
+
+    def GetStopMessage(self, request, context):
+        self.stop_msg_received = True
         response = hogwild_pb2.Empty()
         return response
 
@@ -123,20 +117,17 @@ if __name__ == "__main__":
 
     try:
         # Wait to receive the dataset and start command from the coordinator
-        while not (hws.dataset_received and hws.val_dataset_received and hws.ready_to_calculate):
+        while not (hws.dataset_received and hws.ready_to_calculate):
             pass
         print('Starting SVM calculation.')
         epoch = 1
-        while epoch < hws.epochs:
+        while epoch < hws.epochs and not hws.stop_msg_received:
             print('Epoch {}'.format(epoch))
             # Select random subset and calculate weight updates for it
             subset_indices = random.sample(range(len(hws.targets)), hws.subset_size)
             data_stoc = [hws.data[x] for x in subset_indices]
             targets_stoc = [hws.targets[x] for x in subset_indices]
             total_delta_w = hws.svm.fit(data_stoc, targets_stoc, update=not s.synchronous)
-            #train_loss = hws.svm.loss(data_stoc, targets_stoc)
-            #val_loss = hws.svm.loss(hws.val_data, hws.val_targets)
-            #print('    Train loss: {:.4f}, Val loss: {:.4f}'.format(train_loss, val_loss))
 
             # If SYNC send to coordinator
             if s.synchronous:
@@ -165,26 +156,19 @@ if __name__ == "__main__":
                 for stub in hws.stubs.values():
                     weight_update = hogwild_pb2.WeightUpdate(delta_w=total_delta_w)
                     response = stub.GetWeightUpdate(weight_update)
-                # Wait for the weight updates from all other nodes
-                while not hws.wait_for_all_nodes_counter == len(hws.node_addresses):
-                    pass
                 # Use weight updates from other nodes to update own weights
-                hws.svm.update_weights(hws.all_delta_w)
-                hws.all_delta_w = {}
-                hws.wait_for_all_nodes_counter = 0
-                # Send ReadyToGo to all other nodes
-                for stub in hws.stubs.values():
-                    rtg = hogwild_pb2.ReadyToGo()
-                    response = stub.GetReadyToGo(rtg)
-                if epoch < hws.epochs:
-                    # Wait for the ReadyToGo from all other nodes
-                    while not hws.ready_to_go_counter == len(hws.node_addresses):
-                        pass
-                    hws.ready_to_go_counter = 0
+                with hws.weight_lock:
+                    hws.svm.update_weights(hws.all_delta_w)
+                    hws.all_delta_w = {}
 
             epoch += 1
-        # Send message to coordinator that SGD has finished
-        ep_done = hogwild_pb2.EpochsDone()
-        response = hws.stubs[hws.coordinator_address].GetEpochsDone(ep_done)
+        # Send message to all nodes that SGD has finished
+        for stub in hws.stubs.values():
+            ep_done = hogwild_pb2.EpochsDone()
+            response = stub.GetEpochsDone(ep_done)
+
+        # Wait for message of all nodes that they also finished before quitting
+        while not hws.epochs_done == len(hws.stubs) - 1:
+            pass
     except KeyboardInterrupt:
         server.stop(0)

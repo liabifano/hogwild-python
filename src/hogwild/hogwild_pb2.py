@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hogwild.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\rhogwild.proto\"\x07\n\x05\x45mpty\"B\n\x0bNetworkInfo\x12\x1b\n\x13\x63oordinator_address\x18\x01 \x01(\t\x12\x16\n\x0enode_addresses\x18\x02 \x03(\t\"\xb7\x01\n\x07\x44\x61taSet\x12&\n\ndatapoints\x18\x01 \x03(\x0b\x32\x12.DataSet.DataPoint\x1a\x83\x01\n\tDataPoint\x12\x34\n\tdatapoint\x18\x01 \x03(\x0b\x32!.DataSet.DataPoint.DatapointEntry\x12\x0e\n\x06target\x18\x02 \x01(\x05\x1a\x30\n\x0e\x44\x61tapointEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"k\n\x0cStartMessage\x12\x15\n\rlearning_rate\x18\x01 \x01(\x02\x12\x12\n\nlambda_reg\x18\x02 \x01(\x02\x12\x0e\n\x06\x65pochs\x18\x03 \x01(\x05\x12\x13\n\x0bsubset_size\x18\x04 \x01(\x05\x12\x0b\n\x03\x64im\x18\x05 \x01(\x05\"i\n\x0cWeightUpdate\x12*\n\x07\x64\x65lta_w\x18\x01 \x03(\x0b\x32\x19.WeightUpdate.DeltaWEntry\x1a-\n\x0b\x44\x65ltaWEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0b\n\tReadyToGo\"\x0c\n\nEpochsDone2\x99\x02\n\x07Hogwild\x12%\n\x0bGetNodeInfo\x12\x0c.NetworkInfo\x1a\x06.Empty\"\x00\x12 \n\nGetDataSet\x12\x08.DataSet\x1a\x06.Empty\"\x00\x12&\n\x10GetValidationSet\x12\x08.DataSet\x1a\x06.Empty\"\x00\x12#\n\x08StartSGD\x12\r.StartMessage\x1a\x06.Empty\"\x00\x12*\n\x0fGetWeightUpdate\x12\r.WeightUpdate\x1a\x06.Empty\"\x00\x12$\n\x0cGetReadyToGo\x12\n.ReadyToGo\x1a\x06.Empty\"\x00\x12&\n\rGetEpochsDone\x12\x0b.EpochsDone\x1a\x06.Empty\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\rhogwild.proto\"\x07\n\x05\x45mpty\"B\n\x0bNetworkInfo\x12\x1b\n\x13\x63oordinator_address\x18\x01 \x01(\t\x12\x16\n\x0enode_addresses\x18\x02 \x03(\t\"\xb7\x01\n\x07\x44\x61taSet\x12&\n\ndatapoints\x18\x01 \x03(\x0b\x32\x12.DataSet.DataPoint\x1a\x83\x01\n\tDataPoint\x12\x34\n\tdatapoint\x18\x01 \x03(\x0b\x32!.DataSet.DataPoint.DatapointEntry\x12\x0e\n\x06target\x18\x02 \x01(\x05\x1a\x30\n\x0e\x44\x61tapointEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"k\n\x0cStartMessage\x12\x15\n\rlearning_rate\x18\x01 \x01(\x02\x12\x12\n\nlambda_reg\x18\x02 \x01(\x02\x12\x0e\n\x06\x65pochs\x18\x03 \x01(\x05\x12\x13\n\x0bsubset_size\x18\x04 \x01(\x05\x12\x0b\n\x03\x64im\x18\x05 \x01(\x05\"i\n\x0cWeightUpdate\x12*\n\x07\x64\x65lta_w\x18\x01 \x03(\x0b\x32\x19.WeightUpdate.DeltaWEntry\x1a-\n\x0b\x44\x65ltaWEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0b\n\tReadyToGo\"\x0c\n\nEpochsDone\"\r\n\x0bStopMessage2\x9b\x02\n\x07Hogwild\x12%\n\x0bGetNodeInfo\x12\x0c.NetworkInfo\x1a\x06.Empty\"\x00\x12 \n\nGetDataSet\x12\x08.DataSet\x1a\x06.Empty\"\x00\x12#\n\x08StartSGD\x12\r.StartMessage\x1a\x06.Empty\"\x00\x12*\n\x0fGetWeightUpdate\x12\r.WeightUpdate\x1a\x06.Empty\"\x00\x12$\n\x0cGetReadyToGo\x12\n.ReadyToGo\x1a\x06.Empty\"\x00\x12&\n\rGetEpochsDone\x12\x0b.EpochsDone\x1a\x06.Empty\"\x00\x12(\n\x0eGetStopMessage\x12\x0c.StopMessage\x1a\x06.Empty\"\x00\x62\x06proto3')
 )
 
 
@@ -366,6 +366,30 @@ _EPOCHSDONE = _descriptor.Descriptor(
   serialized_end=521,
 )
 
+
+_STOPMESSAGE = _descriptor.Descriptor(
+  name='StopMessage',
+  full_name='StopMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=523,
+  serialized_end=536,
+)
+
 _DATASET_DATAPOINT_DATAPOINTENTRY.containing_type = _DATASET_DATAPOINT
 _DATASET_DATAPOINT.fields_by_name['datapoint'].message_type = _DATASET_DATAPOINT_DATAPOINTENTRY
 _DATASET_DATAPOINT.containing_type = _DATASET
@@ -379,6 +403,7 @@ DESCRIPTOR.message_types_by_name['StartMessage'] = _STARTMESSAGE
 DESCRIPTOR.message_types_by_name['WeightUpdate'] = _WEIGHTUPDATE
 DESCRIPTOR.message_types_by_name['ReadyToGo'] = _READYTOGO
 DESCRIPTOR.message_types_by_name['EpochsDone'] = _EPOCHSDONE
+DESCRIPTOR.message_types_by_name['StopMessage'] = _STOPMESSAGE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), dict(
@@ -454,6 +479,13 @@ EpochsDone = _reflection.GeneratedProtocolMessageType('EpochsDone', (_message.Me
   ))
 _sym_db.RegisterMessage(EpochsDone)
 
+StopMessage = _reflection.GeneratedProtocolMessageType('StopMessage', (_message.Message,), dict(
+  DESCRIPTOR = _STOPMESSAGE,
+  __module__ = 'hogwild_pb2'
+  # @@protoc_insertion_point(class_scope:StopMessage)
+  ))
+_sym_db.RegisterMessage(StopMessage)
+
 
 _DATASET_DATAPOINT_DATAPOINTENTRY.has_options = True
 _DATASET_DATAPOINT_DATAPOINTENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
@@ -466,8 +498,8 @@ _HOGWILD = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=524,
-  serialized_end=805,
+  serialized_start=539,
+  serialized_end=822,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetNodeInfo',
@@ -488,18 +520,9 @@ _HOGWILD = _descriptor.ServiceDescriptor(
     options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='GetValidationSet',
-    full_name='Hogwild.GetValidationSet',
-    index=2,
-    containing_service=None,
-    input_type=_DATASET,
-    output_type=_EMPTY,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
     name='StartSGD',
     full_name='Hogwild.StartSGD',
-    index=3,
+    index=2,
     containing_service=None,
     input_type=_STARTMESSAGE,
     output_type=_EMPTY,
@@ -508,7 +531,7 @@ _HOGWILD = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetWeightUpdate',
     full_name='Hogwild.GetWeightUpdate',
-    index=4,
+    index=3,
     containing_service=None,
     input_type=_WEIGHTUPDATE,
     output_type=_EMPTY,
@@ -517,7 +540,7 @@ _HOGWILD = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetReadyToGo',
     full_name='Hogwild.GetReadyToGo',
-    index=5,
+    index=4,
     containing_service=None,
     input_type=_READYTOGO,
     output_type=_EMPTY,
@@ -526,9 +549,18 @@ _HOGWILD = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetEpochsDone',
     full_name='Hogwild.GetEpochsDone',
-    index=6,
+    index=5,
     containing_service=None,
     input_type=_EPOCHSDONE,
+    output_type=_EMPTY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetStopMessage',
+    full_name='Hogwild.GetStopMessage',
+    index=6,
+    containing_service=None,
+    input_type=_STOPMESSAGE,
     output_type=_EMPTY,
     options=None,
   ),

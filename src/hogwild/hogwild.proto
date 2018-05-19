@@ -31,12 +31,14 @@ message ReadyToGo {}
 
 message EpochsDone {}
 
+message StopMessage {}
+
 service Hogwild {
     rpc GetNodeInfo (NetworkInfo) returns (Empty) {}
     rpc GetDataSet (DataSet) returns (Empty) {}
-    rpc GetValidationSet (DataSet) returns (Empty) {}
     rpc StartSGD (StartMessage) returns (Empty) {}
     rpc GetWeightUpdate (WeightUpdate) returns (Empty) {}
     rpc GetReadyToGo (ReadyToGo) returns (Empty) {}
     rpc GetEpochsDone (EpochsDone) returns (Empty) {}
+    rpc GetStopMessage (StopMessage) returns (Empty) {}
 }

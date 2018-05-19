@@ -29,10 +29,10 @@ RC_LARGE_TEST_PATH3 = os.path.join((os.sep)
 # When running on different machines, can use the same port for all.
 coordinator_port = '50051'
 coordinator_address = 'localhost:{}'.format(coordinator_port)
-node_addresses = ['localhost:50052', 'localhost:50053']
+node_addresses = ['localhost:50052', 'localhost:50053', 'localhost:50054']
 
 # TODO: Temporary. Set flag with startup...
-synchronous = True # Synchronous or asynchronous mode selection
+synchronous = False # Synchronous or asynchronous mode selection
 
 learning_rate = 0.01 # Learning rate for SGD
 validation_split = 0.1 # Percentage of validation data

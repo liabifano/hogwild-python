@@ -7,6 +7,7 @@ from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data, utils
 from hogwild import settings as s
 from hogwild.node import HogwildServicer
 from hogwild.svm import SVM
+from hogwild.EarlyStopping import EarlyStopping
 
 if __name__ == '__main__':
 
@@ -54,16 +55,6 @@ if __name__ == '__main__':
             dp_i.target = t
         response = stub.GetDataSet(dataset)
 
-        # # Send the validation set to all workers
-        # print('Sending validation dataset to node at {}'.format(node_addr))
-        # dataset = hogwild_pb2.DataSet()
-        # for dp, t in zip(data_val, targets_val):
-        #     dp_i = dataset.datapoints.add()
-        #     for k, v in dp.items():
-        #         dp_i.datapoint[k] = v
-        #     dp_i.target = t
-        # response = stub.GetValidationSet(dataset)
-
     # Step 3: Create a listener for the coordinator and send start command to all nodes
     # Create a gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -90,9 +81,13 @@ if __name__ == '__main__':
         response = stub.StartSGD(start)
     print('Start message sent to all nodes. SGD running...')
 
+    # Early stopping
+    early_stopping = EarlyStopping(s.persistence)
+    stopping_crit_reached = False
+
     # Wait until SGD done and calculate prediction
     try:
-        while hws.epochs_done != len(s.node_addresses):
+        while hws.epochs_done != len(s.node_addresses) and not stopping_crit_reached:
             # If SYNC
             if s.synchronous:
                 # Wait for the weight updates from all workers
@@ -114,18 +109,33 @@ if __name__ == '__main__':
                     rtg = hogwild_pb2.ReadyToGo()
                     response = stub.GetReadyToGo(rtg)
                 hws.ready_to_go_counter = 0
-                # Calculate validation loss
-                val_loss = hws.svm.loss(data_val, targets_val)
-                print('Val loss: {:.4f}'.format(val_loss))
 
             # If ASYNC
             else:
-                pass
+                # Wait for sufficient number of weight updates
+                while len(hws.all_delta_w) < s.subset_size * len(s.node_addresses):
+                    pass
+                with hws.weight_lock:
+                    hws.svm.update_weights(hws.all_delta_w)
+                    hws.all_delta_w = {}
 
+            # Calculate validation loss
+            val_loss = hws.svm.loss(data_val, targets_val)
+            print('Val loss: {:.4f}'.format(val_loss))
+
+            # Check for early stopping
+            stopping_crit_reached = early_stopping.stopping_criterion(val_loss)
+            if stopping_crit_reached:
+                for stub in stubs.values():
+                    stop_msg = hogwild_pb2.StopMessage()
+                    response = stub.GetStopMessage(stop_msg)
 
         print('All SGD epochs done!')
 
-        #hws.svm.update_weights(hws.all_delta_w)
+        # IF ASYNC
+        if not s.synchronous:
+            hws.svm.update_weights(hws.all_delta_w)
+
         prediction = hws.svm.predict(data_val)
         a = sum([1 for x in zip(targets_val, prediction) if x[0] == 1 and x[1] == 1])
         b = sum([1 for x in targets_val if x == 1])
