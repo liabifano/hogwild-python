@@ -18,19 +18,18 @@ def load_small_reuters_data():
         data = [generate_dictionary(line[1:]) for line in content]
     return data, labels
 
-def load_large_reuters_data(selected_cat='CCAT', train=True):
+def load_large_reuters_data(train_path, topics_path, test_path, selected_cat='CCAT', train=True):
     data = []
     labels = []
     if train:
-        with open(settings.RC_LARGE_TRAIN_PATH) as f:
+        with open(train_path) as f:
             content = f.readlines()
             content = [line.strip() for line in content]
             content = [line.split(' ') for line in content]
             labels = [int(line[0]) for line in content]
             data = [generate_dictionary(line[2:]) for line in content]
     else:
-        paths = [settings.RC_LARGE_TEST_PATH0, settings.RC_LARGE_TEST_PATH1,
-                 settings.RC_LARGE_TEST_PATH2, settings.RC_LARGE_TEST_PATH3]
+        paths = test_path
         for path in paths:
             with open(path) as f:
                 content = f.readlines()
@@ -46,7 +45,7 @@ def load_large_reuters_data(selected_cat='CCAT', train=True):
 
 def get_category_dict():
     categories = {}
-    with open(settings.RC_LARGE_LABELS_PATH) as f:
+    with open(settings.TOPICS_FILE) as f:
         content = f.readlines()
         content = [line.strip() for line in content]
         content = [line.split(' ') for line in content]
@@ -58,5 +57,3 @@ def get_category_dict():
             else:
                 categories[id].append(cat)
     return categories
-
-a,b = load_large_reuters_data()

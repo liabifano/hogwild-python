@@ -1,13 +1,13 @@
 import grpc
+import os
 import random
-import time
 from concurrent import futures
-
 from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data, utils
 from hogwild import settings as s
+from hogwild.EarlyStopping import EarlyStopping
 from hogwild.node import HogwildServicer
 from hogwild.svm import SVM
-from hogwild.EarlyStopping import EarlyStopping
+import sys
 
 if __name__ == '__main__':
 
@@ -15,8 +15,12 @@ if __name__ == '__main__':
     # print('Data path:', s.RC_SMALL_TRAIN_PATH)
     # data, labels = ingest_data.load_small_reuters_data()
     # targets = [1 if x in ['ECAT', 'CCAT', 'M11'] else -1 for x in labels]
-    print('Data path:', s.RC_LARGE_TRAIN_PATH)
-    data, targets = ingest_data.load_large_reuters_data(selected_cat='CCAT', train=True)
+    print('Data path:', s.TRAIN_FILE)  # TODO: No need of it anymore, the nodes has access to it
+    data, targets = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
+                                                        s.TOPICS_FILE,
+                                                        s.TEST_FILES,
+                                                        selected_cat='CCAT',
+                                                        train=True)
     print('Number of datapoints: {}'.format(len(targets)))
 
     # Split into train and validation datasets
@@ -145,5 +149,11 @@ if __name__ == '__main__':
         d = sum([1 for x in targets_val if x == -1])
         print('Val accuracy of Label -1: {:.2f}%'.format(c / d))
         print('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
+
+        with open(s.LOGS_FILE, "w") as text_file:
+            text_file.write('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
+        # sys.stdout.write('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
+        # sys.exit()
+
     except KeyboardInterrupt:
         server.stop(0)

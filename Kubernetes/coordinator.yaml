@@ -25,7 +25,7 @@ spec:
   selector:
     matchLabels:
       app: coordinator-service
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
