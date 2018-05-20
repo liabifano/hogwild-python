@@ -7,12 +7,11 @@ metadata:
     app: coordinator-service
 spec:
   ports:
-  - port: 80
-    name: coordinator
+    - port: 80
+      name: coordinator
   clusterIP: None
   selector:
     app: coordinator-service
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -21,6 +20,7 @@ metadata:
     app: coordinator-service
 spec:
   serviceName: "coordinator-service"
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       app: coordinator-service
@@ -31,16 +31,20 @@ spec:
         app: coordinator-service
     spec:
       containers:
-      - name: coordinator-service
-        image: liabifano/hogwild:latest
-        ports:
-        - containerPort: 80
-          name: coordinator
-        command: ["python", "hogwild-python/src/hogwild/coordinator.py", "80"]
-        env:
-        - name: N_WORKERS
-          value: "5"
-        volumeMounts:
+        - name: coordinator-service
+          image: liabifano/hogwild:latest
+          env:
+            - name: N_WORKERS
+              value: "5"
+            - name: RUNNING_MODE
+              value: "synchronous"
+            - name: DATA_PATH
+              value: "my-path"
+          ports:
+            - containerPort: 80
+              name: coordinator
+          command: ["python", "hogwild-python/src/hogwild/coordinator.py", "80"]
+          volumeMounts:
             - name: shared-volume
               mountPath: /data
       volumes:

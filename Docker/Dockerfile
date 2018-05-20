@@ -4,6 +4,6 @@ RUN python3 -m pip install pip --upgrade
 
 
 COPY src /hogwild-python/src/
-COPY conda.txt setup.py /hogwild-python/
+COPY setup.py /hogwild-python/
 
 RUN cd /hogwild-python/ && pip install -e .

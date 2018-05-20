@@ -7,12 +7,11 @@ metadata:
     app: workers-service
 spec:
   ports:
-  - port: 80
-    name: worker
+    - port: 80
+      name: worker
   clusterIP: None
   selector:
     app: workers-service
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -32,16 +31,20 @@ spec:
         app: workers-service
     spec:
       containers:
-      - name: workers-service
-        image: liabifano/hogwild_node:latest
-        env:
-        - name: N_WORKERS
-          value: "5"
-        ports:
-        - containerPort: 80
-          name: worker
-        command: ["python", "hogwild-python/src/hogwild/node.py", "80"]
-        volumeMounts:
+        - name: workers-service
+          image: liabifano/hogwild:latest
+          env:
+            - name: N_WORKERS
+              value: "5"
+            - name: RUNNING_MODE
+              value: "synchronous"
+            - name: DATA_PATH
+              value: "my-path"
+          ports:
+            - containerPort: 80
+              name: worker
+          command: ["python", "hogwild-python/src/hogwild/node.py", "80"]
+          volumeMounts:
             - name: shared-volume
               mountPath: /data
       volumes:
