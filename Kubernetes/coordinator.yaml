@@ -12,6 +12,7 @@ spec:
   clusterIP: None
   selector:
     app: coordinator-service
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -24,7 +25,7 @@ spec:
   selector:
     matchLabels:
       app: coordinator-service
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -35,11 +36,20 @@ spec:
           image: liabifano/hogwild:latest
           env:
             - name: N_WORKERS
-              value: "5"
+              valueFrom:
+                configMapKeyRef:
+                  name: hogwild-config
+                  key: replicas
             - name: RUNNING_MODE
-              value: "synchronous"
+              valueFrom:
+                configMapKeyRef:
+                  name: hogwild-config
+                  key: running_mode
             - name: DATA_PATH
-              value: "my-path"
+              valueFrom:
+                configMapKeyRef:
+                  name: hogwild-config
+                  key: data_path
           ports:
             - containerPort: 80
               name: coordinator

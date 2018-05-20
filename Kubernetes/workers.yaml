@@ -12,6 +12,7 @@ spec:
   clusterIP: None
   selector:
     app: workers-service
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -35,11 +36,20 @@ spec:
           image: liabifano/hogwild:latest
           env:
             - name: N_WORKERS
-              value: "5"
+              valueFrom:
+                configMapKeyRef:
+                  name: hogwild-config
+                  key: replicas
             - name: RUNNING_MODE
-              value: "synchronous"
+              valueFrom:
+                configMapKeyRef:
+                  name: hogwild-config
+                  key: running_mode
             - name: DATA_PATH
-              value: "my-path"
+              valueFrom:
+                configMapKeyRef:
+                  name: hogwild-config
+                  key: data_path
           ports:
             - containerPort: 80
               name: worker
