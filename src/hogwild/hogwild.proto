@@ -25,6 +25,7 @@ message StartMessage {
 
 message WeightUpdate {
     map<int32, float> delta_w = 1;
+//    map<int32, float> train_loss = 2;
 }
 
 message ReadyToGo {}

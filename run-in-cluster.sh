@@ -6,10 +6,11 @@ KUBER_LOGIN=cs449g9
 
 DATA_PATH=/data/datasets
 
-while getopts ":n:r:" opt; do
+while getopts ":n:r:f:" opt; do
   case $opt in
     n) N_WORKERS="$OPTARG";;
     r) RUNNING_MODE="$OPTARG";;
+    f) FILE_LOG="$OPTARG";;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
@@ -17,8 +18,6 @@ done
 
 
 function shutdown_infra {
-    echo
-    echo "----- Deleting remaining services and configurations -----"
     if ! [[ -z $(kubectl get services | grep workers-service) ]];
     then
         kubectl delete -f Kubernetes/workers.yaml --cascade=true
@@ -35,10 +34,11 @@ function shutdown_infra {
     fi;
 }
 
-
 # Don't forget to run login first with `docker login`
-docker login --username=$DOCKER_USER --password=$DOCKER_PASS
+docker login --username=$DOCKER_USER --password=$DOCKER_PASS 2> /dev/null
 
+echo
+echo "----- Deleting remaining infra -----"
 shutdown_infra
 
 echo
@@ -59,16 +59,49 @@ do
     sleep 1
 done
 
-get all ips of workers
 
 echo
 echo "----- Workers are up and running, starting coordinator -----"
 kubectl create -f Kubernetes/coordinator.yaml
 
 
+while [ $(kubectl get pods | grep coordinator | grep Running | wc -l) == 0 ]
+do
+    sleep 1
+done
+echo
+echo "----- Running Job -----"
 
 
-#shutdown_infra
+while [ $(kubectl get pods | grep coordinator | grep Running | wc -l) == 0 ]
+do
+    sleep 1
+done
+
+
+MY_TIME="`date +%Y%m%d%H%M%S`" && kubectl cp coordinator-0:logs.txt logs/log_${MY_TIME}.txt 2> /dev/null
+while [ $? -ne 0 ];
+do
+    sleep 1
+    MY_TIME="`date +%Y%m%d%H%M%S`" && kubectl cp coordinator-0:log.json logs/log_${MY_TIME}.json 2> /dev/null
+done
+
+
+echo
+echo "----- Job Completed, logs available in logs/log_${MY_TIME}.json -----"
+
+
+if [[ -z $(ls logs | grep ${FILE_LOG}) ]];
+    then
+        touch ${FILE_LOG}
+    fi;
+
+jq -s add logs/${FILE_LOG} logs/log_${MY_TIME}
+
+echo
+echo
+echo "----- Shutting down infra -----"
+shutdown_infra
 
 # useful commands
 #kubectl delete po,svc --all

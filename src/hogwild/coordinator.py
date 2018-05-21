@@ -6,9 +6,10 @@ from hogwild import settings as s, utils as u
 from hogwild.EarlyStopping import EarlyStopping
 from hogwild.node import HogwildServicer
 from hogwild.svm import SVM
+from time import time
+import json
 
 if __name__ == '__main__':
-
     # Step 1: Load the data from the reuters dataset and create targets
     # print('Data path:', s.RC_SMALL_TRAIN_PATH)
     # data, labels = ingest_data.load_small_reuters_data()
@@ -95,6 +96,8 @@ if __name__ == '__main__':
 
     # Wait until SGD done and calculate prediction
     try:
+        t0 = time()
+        losses_val = []
         while hws.epochs_done != len(node_addresses) and not stopping_crit_reached:
             # If SYNC
             if s.synchronous:
@@ -129,6 +132,7 @@ if __name__ == '__main__':
 
             # Calculate validation loss
             val_loss = hws.svm.loss(data_val, targets_val)
+            losses_val.append({'time': time(), 'loss_val': val_loss})
             print('Val loss: {:.4f}'.format(val_loss))
 
             # Check for early stopping
@@ -154,10 +158,21 @@ if __name__ == '__main__':
         print('Val accuracy of Label -1: {:.2f}%'.format(c / d))
         print('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
 
-        with open(s.LOGS_FILE, "w") as text_file:
-            text_file.write('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
-            # sys.stdout.write('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
-            # sys.exit()
+        t1 = time()
+
+        log = [{'start_time': t0,
+                'end_time': t1,
+                'running_time': t1 - t0,
+                'n_workers': s.N_WORKERS,
+                'running_mode': s.running_mode,
+                'accuracy': utils.accuracy(targets_val, prediction),
+                'accuracy_1': a / b,
+                'accuracy_-1': c / d,
+                'losses_val': losses_val,
+                'tag': ''}]
+
+        with open('log.json', 'w') as outfile:
+            json.dump(log, outfile)
 
     except KeyboardInterrupt:
         server.stop(0)
