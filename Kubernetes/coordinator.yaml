@@ -53,7 +53,7 @@ spec:
           ports:
             - containerPort: 80
               name: coordinator
-          command: ["python", "hogwild-python/src/hogwild/coordinator.py", "80"]
+          command: ["python", "hogwild-python/src/hogwild/coordinator.py"]
           volumeMounts:
             - name: shared-volume
               mountPath: /data

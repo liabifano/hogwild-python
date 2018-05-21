@@ -1,5 +1,6 @@
 import operator
 import random
+import socket
 
 import numpy as np
 
@@ -26,3 +27,7 @@ def split_dataset(data, target, k):
     return [zip(list(operator.itemgetter(*s)(data)),
                 list(operator.itemgetter(*s)(target)))
             for s in splits]
+
+
+def ip(hostname, port):
+    return '{}:{}'.format(socket.gethostbyname(hostname), port)

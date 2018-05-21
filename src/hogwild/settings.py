@@ -36,12 +36,14 @@ TEST_FILES = [os.path.join(DATA_PATH, x) for x in ['lyrl2004_vectors_test_pt0.da
                                                    'lyrl2004_vectors_test_pt1.dat',
                                                    'lyrl2004_vectors_test_pt2.dat',
                                                    'lyrl2004_vectors_test_pt3.dat']]
-LOGS_FILE = os.path.join(os.environ['PWD'], 'logs.txt')
+LOGS_FILE = 'logs.txt'
 
-coordinator_address = 'coordinator-0'
-node_addresses = ['worker-{}'.format(str(x)) for x in range(N_WORKERS)]
+coordinator_hostname = 'coordinator-0.coordinator-service'
+node_hostnames = ['worker-{}.workers-service'.format(str(x)) for x in range(N_WORKERS)]
+port = 80
 
 running_mode = os.environ['RUNNING_MODE']  # Synchronous or asynchronous mode selection
+synchronous = running_mode == 'synchronous'
 
 learning_rate = 0.01  # Learning rate for SGD
 validation_split = 0.1  # Percentage of validation data

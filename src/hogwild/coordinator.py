@@ -1,13 +1,11 @@
 import grpc
-import os
 import random
 from concurrent import futures
 from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data, utils
-from hogwild import settings as s
+from hogwild import settings as s, utils as u
 from hogwild.EarlyStopping import EarlyStopping
 from hogwild.node import HogwildServicer
 from hogwild.svm import SVM
-import sys
 
 if __name__ == '__main__':
 
@@ -31,23 +29,29 @@ if __name__ == '__main__':
     targets_val = [targets[x] for x in val_indices]
 
     # Divide data among all nodes evenly
-    data_split = utils.split_dataset(data_train, targets_train, len(s.node_addresses))
+    data_split = utils.split_dataset(data_train, targets_train, len(s.node_hostnames))
 
     # Step 2: Startup the nodes
     # addresses of all nodes and coordinator and the dataset to all worker nodes
     stubs = {}
-    for i, node_addr in enumerate(s.node_addresses):
+    node_addresses = [u.ip(x, s.port) for x in s.node_hostnames]
+    print(node_addresses)
+    for i, node_addr in enumerate(node_addresses):
+        print(node_addr)
         # Open a gRPC channel
-        channel = grpc.insecure_channel(node_addr, options=[('grpc.max_message_length', 1024 * 1024 * 1024), \
-                                                            ('grpc.max_send_message_length', 1024 * 1024 * 1024), \
+        channel = grpc.insecure_channel(node_addr, options=[('grpc.max_message_length', 1024 * 1024 * 1024),
+                                                            ('grpc.max_send_message_length', 1024 * 1024 * 1024),
                                                             ('grpc.max_receive_message_length', 1024 * 1024 * 1024)])
         # Create a stub (client)
         stub = hogwild_pb2_grpc.HogwildStub(channel)
         stubs[node_addr] = stub
         # Send to each node the list of all other nodes and the coordinator
-        other_nodes = s.node_addresses.copy()
+        other_nodes = node_addresses.copy()
         other_nodes.remove(node_addr)
-        info = hogwild_pb2.NetworkInfo(coordinator_address=s.coordinator_address, node_addresses=other_nodes)
+        print(other_nodes)
+        coordinator_address = u.ip(s.coordinator_hostname, s.port)
+        info = hogwild_pb2.NetworkInfo(coordinator_address=coordinator_address, node_addresses=other_nodes)
+        print(info)
         response = stub.GetNodeInfo(info)
         # Send the whole dataset to all the workers
         print('Sending dataset to node at {}'.format(node_addr))
@@ -71,8 +75,8 @@ if __name__ == '__main__':
     hws.svm = SVM(learning_rate=s.learning_rate, lambda_reg=s.lambda_reg, dim=dim)
 
     # Listen on port defined in settings.py
-    print('Starting coordinator server. Listening on port {}.'.format(s.coordinator_port))
-    server.add_insecure_port('[::]:{}'.format(s.coordinator_port))
+    print('Starting coordinator server. Listening on port {}.'.format(s.port))
+    server.add_insecure_port('[::]:{}'.format(s.port))
     server.start()
 
     # Send start message to all the nodes
@@ -91,11 +95,11 @@ if __name__ == '__main__':
 
     # Wait until SGD done and calculate prediction
     try:
-        while hws.epochs_done != len(s.node_addresses) and not stopping_crit_reached:
+        while hws.epochs_done != len(node_addresses) and not stopping_crit_reached:
             # If SYNC
             if s.synchronous:
                 # Wait for the weight updates from all workers
-                while not hws.wait_for_all_nodes_counter == len(s.node_addresses):
+                while not hws.wait_for_all_nodes_counter == len(node_addresses):
                     pass
                 # Send accumulated weight update to all workers
                 for stub in stubs.values():
@@ -106,7 +110,7 @@ if __name__ == '__main__':
                 hws.all_delta_w = {}
                 hws.wait_for_all_nodes_counter = 0
                 # Wait for the ReadyToGo from all workers
-                while not hws.ready_to_go_counter == len(s.node_addresses):
+                while not hws.ready_to_go_counter == len(node_addresses):
                     pass
                 # Send ReadyToGo to all workers
                 for stub in stubs.values():
@@ -117,7 +121,7 @@ if __name__ == '__main__':
             # If ASYNC
             else:
                 # Wait for sufficient number of weight updates
-                while len(hws.all_delta_w) < s.subset_size * len(s.node_addresses):
+                while len(hws.all_delta_w) < s.subset_size * len(node_addresses):
                     pass
                 with hws.weight_lock:
                     hws.svm.update_weights(hws.all_delta_w)
@@ -152,8 +156,8 @@ if __name__ == '__main__':
 
         with open(s.LOGS_FILE, "w") as text_file:
             text_file.write('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
-        # sys.stdout.write('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
-        # sys.exit()
+            # sys.stdout.write('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
+            # sys.exit()
 
     except KeyboardInterrupt:
         server.stop(0)
