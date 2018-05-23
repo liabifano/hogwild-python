@@ -12,10 +12,7 @@ from time import time
 
 if __name__ == '__main__':
     # Step 1: Load the data from the reuters dataset and create targets
-    # print('Data path:', s.RC_SMALL_TRAIN_PATH)
-    # data, labels = ingest_data.load_small_reuters_data()
-    # targets = [1 if x in ['ECAT', 'CCAT', 'M11'] else -1 for x in labels]
-    print('Data path:', s.TRAIN_FILE)  # TODO: No need of it anymore, the nodes has access to it
+    print('Data path:', s.TRAIN_FILE)
     data, targets = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
                                                         s.TOPICS_FILE,
                                                         s.TEST_FILES,
@@ -29,9 +26,8 @@ if __name__ == '__main__':
     targets_train = [targets[x] for x in range(len(targets)) if x not in val_indices]
     data_val = [data[x] for x in val_indices]
     targets_val = [targets[x] for x in val_indices]
-
-    # Divide data among all nodes evenly
-    data_split = utils.split_dataset(data_train, targets_train, len(s.node_hostnames))
+    print('Number of train datapoints: {}'.format(len(targets_train)))
+    print('Number of validation datapoints: {}'.format(len(targets_val)))
 
     # Step 2: Startup the nodes
     # addresses of all nodes and coordinator and the dataset to all worker nodes
@@ -52,18 +48,10 @@ if __name__ == '__main__':
         other_nodes.remove(node_addr)
         print(other_nodes)
         coordinator_address = u.ip(s.coordinator_hostname, s.port)
-        info = hogwild_pb2.NetworkInfo(coordinator_address=coordinator_address, node_addresses=other_nodes)
-        print(info)
+        info = hogwild_pb2.NetworkInfo(coordinator_address=coordinator_address,
+                                       node_addresses=other_nodes,
+                                       val_indices=val_indices)
         response = stub.GetNodeInfo(info)
-        # Send the whole dataset to all the workers
-        print('Sending dataset to node at {}'.format(node_addr))
-        dataset = hogwild_pb2.DataSet()
-        for dp, t in data_split[i]:
-            dp_i = dataset.datapoints.add()
-            for k, v in dp.items():
-                dp_i.datapoint[k] = v
-            dp_i.target = t
-        response = stub.GetDataSet(dataset)
 
     # Step 3: Create a listener for the coordinator and send start command to all nodes
     # Create a gRPC server

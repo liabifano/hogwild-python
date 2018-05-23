@@ -5,6 +5,7 @@ message Empty {}
 message NetworkInfo {
     string coordinator_address = 1;
     repeated string node_addresses = 2;
+    repeated int32 val_indices = 3;
 }
 
 message DataSet {
@@ -36,7 +37,6 @@ message StopMessage {}
 
 service Hogwild {
     rpc GetNodeInfo (NetworkInfo) returns (Empty) {}
-    rpc GetDataSet (DataSet) returns (Empty) {}
     rpc StartSGD (StartMessage) returns (Empty) {}
     rpc GetWeightUpdate (WeightUpdate) returns (Empty) {}
     rpc GetReadyToGo (ReadyToGo) returns (Empty) {}

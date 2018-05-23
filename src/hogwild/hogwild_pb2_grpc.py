@@ -19,11 +19,6 @@ class HogwildStub(object):
         request_serializer=hogwild__pb2.NetworkInfo.SerializeToString,
         response_deserializer=hogwild__pb2.Empty.FromString,
         )
-    self.GetDataSet = channel.unary_unary(
-        '/Hogwild/GetDataSet',
-        request_serializer=hogwild__pb2.DataSet.SerializeToString,
-        response_deserializer=hogwild__pb2.Empty.FromString,
-        )
     self.StartSGD = channel.unary_unary(
         '/Hogwild/StartSGD',
         request_serializer=hogwild__pb2.StartMessage.SerializeToString,
@@ -56,13 +51,6 @@ class HogwildServicer(object):
   pass
 
   def GetNodeInfo(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def GetDataSet(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -110,11 +98,6 @@ def add_HogwildServicer_to_server(servicer, server):
       'GetNodeInfo': grpc.unary_unary_rpc_method_handler(
           servicer.GetNodeInfo,
           request_deserializer=hogwild__pb2.NetworkInfo.FromString,
-          response_serializer=hogwild__pb2.Empty.SerializeToString,
-      ),
-      'GetDataSet': grpc.unary_unary_rpc_method_handler(
-          servicer.GetDataSet,
-          request_deserializer=hogwild__pb2.DataSet.FromString,
           response_serializer=hogwild__pb2.Empty.SerializeToString,
       ),
       'StartSGD': grpc.unary_unary_rpc_method_handler(

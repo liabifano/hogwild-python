@@ -39,13 +39,13 @@ def load_large_reuters_data(train_path, topics_path, test_path, selected_cat='CC
                 data_i = [generate_dictionary(line[2:]) for line in content]
                 labels = labels + labels_i
                 data = data + data_i
-    cat = get_category_dict()
+    cat = get_category_dict(topics_path)
     labels = [1 if selected_cat in cat[label] else -1 for label in labels]
     return data, labels
 
-def get_category_dict():
+def get_category_dict(topics_path):
     categories = {}
-    with open(settings.TOPICS_FILE) as f:
+    with open(topics_path) as f:
         content = f.readlines()
         content = [line.strip() for line in content]
         content = [line.split(' ') for line in content]

@@ -24,7 +24,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.epochs = 0
         self.subset_size = 0
 
-        self.dataset_received = False
+        self.nodeinfo_received = False
         self.ready_to_calculate = False
         self.svm = None
         self.all_delta_w = {}
@@ -39,24 +39,14 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         print('Received node network information!')
         self.coordinator_address = request.coordinator_address
         self.node_addresses = request.node_addresses
+        self.val_indices = request.val_indices
         print('Coordinator at {}'.format(self.coordinator_address))
         print('Other nodes at {}'.format(self.node_addresses))
         for node_addr in list(self.node_addresses) + [str(self.coordinator_address)]:
             channel = grpc.insecure_channel(node_addr)
             stub = hogwild_pb2_grpc.HogwildStub(channel)
             self.stubs[node_addr] = stub
-        response = hogwild_pb2.Empty()
-        return response
-
-    def GetDataSet(self, request, context):
-        datapoints = request.datapoints
-        for d in datapoints:
-            self.data.append(dict(d.datapoint))
-            self.targets.append(d.target)
-        print('Received dataset!')
-        print('Dataset length = {}'.format(len(self.data)))
-        print('Targets length = {}'.format(len(self.targets)))
-        self.dataset_received = True
+        self.nodeinfo_received = True
         response = hogwild_pb2.Empty()
         return response
 
@@ -115,18 +105,32 @@ if __name__ == "__main__":
     server.add_insecure_port('[::]:{}'.format(sys.argv[1]))
     server.start()
 
+    # Wait to receive node information
+    while not hws.nodeinfo_received:
+        pass
+    print('Loading training data')
+    data, targets = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
+                                                        s.TOPICS_FILE,
+                                                        s.TEST_FILES,
+                                                        selected_cat='CCAT',
+                                                        train=True)
+    data = [data[x] for x in range(len(targets)) if x not in request.val_indices]
+    targets = [targets[x] for x in range(len(targets)) if x not in request.val_indices]
+    print('Number of training datapoints: {}'.format(len(self.targets)))
+
+    # Wait to receive the start command from the coordinator
+    while not hws.ready_to_calculate:
+        pass
+    print('Starting SVM calculation.')
+
     try:
-        # Wait to receive the dataset and start command from the coordinator
-        while not (hws.dataset_received and hws.ready_to_calculate):
-            pass
-        print('Starting SVM calculation.')
         epoch = 1
         while epoch < hws.epochs and not hws.stop_msg_received:
             print('Epoch {}'.format(epoch))
             # Select random subset and calculate weight updates for it
-            subset_indices = random.sample(range(len(hws.targets)), hws.subset_size)
-            data_stoc = [hws.data[x] for x in subset_indices]
-            targets_stoc = [hws.targets[x] for x in subset_indices]
+            subset_indices = random.sample(range(len(targets)), hws.subset_size)
+            data_stoc = [data[x] for x in subset_indices]
+            targets_stoc = [targets[x] for x in subset_indices]
             total_delta_w = hws.svm.fit(data_stoc, targets_stoc, update=not s.synchronous)
 
             # If SYNC send to coordinator
