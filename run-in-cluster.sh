@@ -8,9 +8,9 @@ DATA_PATH=/data/datasets
 
 while getopts ":n:r:f:" opt; do
   case $opt in
-    n) N_WORKERS="$OPTARG";;
-    r) RUNNING_MODE="$OPTARG";;
-    f) FILE_LOG="$OPTARG";;
+    n) N_WORKERS="$OPTARG";; # number workers
+    r) RUNNING_MODE="$OPTARG";; # synchronous or asynchronous
+    f) FILE_LOG="$OPTARG";; # file where the output of the job will be stored
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
@@ -34,7 +34,8 @@ function shutdown_infra {
     fi;
 }
 
-# Don't forget to run login first with `docker login`
+echo
+echo "----- Logging in Docker Hub -----"
 docker login --username=$DOCKER_USER --password=$DOCKER_PASS 2> /dev/null
 
 echo
@@ -45,6 +46,11 @@ echo
 echo "----- Building and Pushing docker to Docker Hub -----"
 docker build -f `pwd`/Docker/Dockerfile `pwd` -t ${REPO}/${APP_NAME}
 docker push ${REPO}/${APP_NAME}
+
+echo
+echo
+echo "----- Starting Monitoring -----"
+bash monitor-it.sh &
 
 echo
 echo "----- Starting workers -----"
@@ -59,7 +65,7 @@ do
     sleep 1
 done
 
-
+echo
 echo
 echo "----- Workers are up and running, starting coordinator -----"
 kubectl create -f Kubernetes/coordinator.yaml
@@ -69,6 +75,7 @@ while [ $(kubectl get pods | grep coordinator | grep Running | wc -l) == 0 ]
 do
     sleep 1
 done
+
 echo
 echo "----- Running Job -----"
 
@@ -88,17 +95,24 @@ done
 
 
 echo
-echo "----- Job Completed, logs available in logs/log_${MY_TIME}.json -----"
+echo "----- Job Completed, writing log -----"
 
 
 if [[ -z $(ls logs | grep ${FILE_LOG}) ]];
-    then
-        touch ${FILE_LOG}
-    fi;
+then
+    touch logs/${FILE_LOG}
+fi;
 
-jq -s add logs/${FILE_LOG} logs/log_${MY_TIME}
+echo $(jq -s add logs/${FILE_LOG} logs/log_${MY_TIME}.json) > logs/${FILE_LOG}
+rm logs/log_${MY_TIME}.json
 
 echo
+echo "----- Logs available in ${FILE_LOG} -----"
+
+echo
+echo "----- Shutting down monitoring -----"
+kill -9 $(ps -a | grep monitor-it |  awk '{print $1}' | head -n 1)
+
 echo
 echo "----- Shutting down infra -----"
 shutdown_infra
@@ -114,3 +128,7 @@ shutdown_infra
 #kubectl -n my-ns delete po,svc --all
 #kubectl delete -f Kubernetes/workers_template.yaml --cascade=true
 #kubectl exec -it coordinator-0 -- /bin/bash
+
+
+# ➝  kubectl scale --replicas=3 service/workers-service
+#error: Scaling the resource failed with: could not fetch the scale for services workers-service: services "workers-service" is forbidden: User "cs449g9" cannot get services/scale in the namespace "cs449g9"

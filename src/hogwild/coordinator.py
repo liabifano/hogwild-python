@@ -1,13 +1,14 @@
 import grpc
+import json
 import random
 from concurrent import futures
+from datetime import datetime
 from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data, utils
 from hogwild import settings as s, utils as u
 from hogwild.EarlyStopping import EarlyStopping
 from hogwild.node import HogwildServicer
 from hogwild.svm import SVM
 from time import time
-import json
 
 if __name__ == '__main__':
     # Step 1: Load the data from the reuters dataset and create targets
@@ -91,7 +92,7 @@ if __name__ == '__main__':
     print('Start message sent to all nodes. SGD running...')
 
     # Early stopping
-    early_stopping = EarlyStopping(s.persistence)
+    # early_stopping = EarlyStopping(s.persistence)
     stopping_crit_reached = False
 
     # Wait until SGD done and calculate prediction
@@ -132,7 +133,8 @@ if __name__ == '__main__':
 
             # Calculate validation loss
             val_loss = hws.svm.loss(data_val, targets_val)
-            losses_val.append({'time': time(), 'loss_val': val_loss})
+            losses_val.append({'time': datetime.utcfromtimestamp(time()).strftime("%Y-%m-%d %H:%M:%S"),
+                               'loss_val': val_loss})
             print('Val loss: {:.4f}'.format(val_loss))
 
             # Check for early stopping
@@ -160,8 +162,8 @@ if __name__ == '__main__':
 
         t1 = time()
 
-        log = [{'start_time': t0,
-                'end_time': t1,
+        log = [{'start_time': datetime.utcfromtimestamp(t0).strftime("%Y-%m-%d %H:%M:%S"),
+                'end_time': datetime.utcfromtimestamp(t1).strftime("%Y-%m-%d %H:%M:%S"),
                 'running_time': t1 - t0,
                 'n_workers': s.N_WORKERS,
                 'running_mode': s.running_mode,
