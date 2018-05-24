@@ -6,15 +6,22 @@ KUBER_LOGIN=cs449g9
 
 DATA_PATH=/data/datasets
 
-while getopts ":n:r:f:" opt; do
+while getopts ":n:r:f:w:" opt; do
   case $opt in
     n) N_WORKERS="$OPTARG";; # number workers
     r) RUNNING_MODE="$OPTARG";; # synchronous or asynchronous
     f) FILE_LOG="$OPTARG";; # file where the output of the job will be stored
+    w) WHERE="$OPTARG";;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
 done
+
+if [[ $WHERE = "local" ]];
+then
+    bash run-local.sh
+    exit 0
+fi;
 
 
 function shutdown_infra {

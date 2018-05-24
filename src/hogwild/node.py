@@ -7,6 +7,7 @@ from threading import Lock
 
 from hogwild import hogwild_pb2, hogwild_pb2_grpc
 from hogwild.svm import SVM
+from hogwild import ingest_data
 
 
 # Create a class to define the server functions
@@ -36,7 +37,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.stop_msg_received = False
 
     def GetNodeInfo(self, request, context):
-        print('Received node network information!')
+        print('Received node network information!!!!')
         self.coordinator_address = request.coordinator_address
         self.node_addresses = request.node_addresses
         self.val_indices = request.val_indices
@@ -114,9 +115,9 @@ if __name__ == "__main__":
                                                         s.TEST_FILES,
                                                         selected_cat='CCAT',
                                                         train=True)
-    data = [data[x] for x in range(len(targets)) if x not in request.val_indices]
-    targets = [targets[x] for x in range(len(targets)) if x not in request.val_indices]
-    print('Number of training datapoints: {}'.format(len(self.targets)))
+    data = [data[x] for x in range(len(targets)) if x not in hws.val_indices]
+    targets = [targets[x] for x in range(len(targets)) if x not in hws.val_indices]
+    print('Number of training datapoints: {}'.format(len(hws.targets)))
 
     # Wait to receive the start command from the coordinator
     while not hws.ready_to_calculate:

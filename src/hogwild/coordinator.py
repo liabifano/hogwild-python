@@ -4,7 +4,7 @@ import random
 from concurrent import futures
 from datetime import datetime
 from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data, utils
-from hogwild import settings as s, utils as u
+from hogwild import settings as s
 from hogwild.EarlyStopping import EarlyStopping
 from hogwild.node import HogwildServicer
 from hogwild.svm import SVM
@@ -32,10 +32,8 @@ if __name__ == '__main__':
     # Step 2: Startup the nodes
     # addresses of all nodes and coordinator and the dataset to all worker nodes
     stubs = {}
-    node_addresses = [u.ip(x, s.port) for x in s.node_hostnames]
-    print(node_addresses)
-    for i, node_addr in enumerate(node_addresses):
-        print(node_addr)
+    # node_addresses = [u.ip(x, s.port) for x in s.node_hostnames]
+    for i, node_addr in enumerate(s.node_addresses):
         # Open a gRPC channel
         channel = grpc.insecure_channel(node_addr, options=[('grpc.max_message_length', 1024 * 1024 * 1024),
                                                             ('grpc.max_send_message_length', 1024 * 1024 * 1024),
@@ -44,11 +42,9 @@ if __name__ == '__main__':
         stub = hogwild_pb2_grpc.HogwildStub(channel)
         stubs[node_addr] = stub
         # Send to each node the list of all other nodes and the coordinator
-        other_nodes = node_addresses.copy()
+        other_nodes = s.node_addresses.copy()
         other_nodes.remove(node_addr)
-        print(other_nodes)
-        coordinator_address = u.ip(s.coordinator_hostname, s.port)
-        info = hogwild_pb2.NetworkInfo(coordinator_address=coordinator_address,
+        info = hogwild_pb2.NetworkInfo(coordinator_address=s.coordinator_address,
                                        node_addresses=other_nodes,
                                        val_indices=val_indices)
         response = stub.GetNodeInfo(info)
@@ -80,18 +76,18 @@ if __name__ == '__main__':
     print('Start message sent to all nodes. SGD running...')
 
     # Early stopping
-    # early_stopping = EarlyStopping(s.persistence)
+    early_stopping = EarlyStopping(s.persistence)
     stopping_crit_reached = False
 
     # Wait until SGD done and calculate prediction
     try:
         t0 = time()
         losses_val = []
-        while hws.epochs_done != len(node_addresses) and not stopping_crit_reached:
+        while hws.epochs_done != len(s.node_addresses) and not stopping_crit_reached:
             # If SYNC
             if s.synchronous:
                 # Wait for the weight updates from all workers
-                while not hws.wait_for_all_nodes_counter == len(node_addresses):
+                while not hws.wait_for_all_nodes_counter == len(s.node_addresses):
                     pass
                 # Send accumulated weight update to all workers
                 for stub in stubs.values():
@@ -102,7 +98,7 @@ if __name__ == '__main__':
                 hws.all_delta_w = {}
                 hws.wait_for_all_nodes_counter = 0
                 # Wait for the ReadyToGo from all workers
-                while not hws.ready_to_go_counter == len(node_addresses):
+                while not hws.ready_to_go_counter == len(s.node_addresses):
                     pass
                 # Send ReadyToGo to all workers
                 for stub in stubs.values():
@@ -113,7 +109,7 @@ if __name__ == '__main__':
             # If ASYNC
             else:
                 # Wait for sufficient number of weight updates
-                while len(hws.all_delta_w) < s.subset_size * len(node_addresses):
+                while len(hws.all_delta_w) < s.subset_size * len(s.node_addresses):
                     pass
                 with hws.weight_lock:
                     hws.svm.update_weights(hws.all_delta_w)
@@ -161,8 +157,11 @@ if __name__ == '__main__':
                 'losses_val': losses_val,
                 'tag': ''}]
 
-        with open('log.json', 'w') as outfile:
-            json.dump(log, outfile)
+        if s.RUNNING_WHERE == 'local':
+            pass
+        else:
+            with open('log.json', 'w') as outfile:
+                json.dump(log, outfile)
 
     except KeyboardInterrupt:
         server.stop(0)

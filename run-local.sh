@@ -3,6 +3,7 @@ set -eo pipefail
 
 ENVNAME=$(basename `pwd`)
 
+
 if [[ -z $(conda env list | grep ${ENVNAME}) ]];
 then
     echo "bootstraping virtual env"
@@ -11,7 +12,7 @@ fi;
 
 for port in 50052 50053;
 do
-    source activate hogwild-python && python src/hogwild/node.py $port &
+    source activate hogwild-python && export RUNNING_MODE=asyncronous && python src/hogwild/node.py $port &
 done;
 
 source activate hogwild-python && python src/hogwild/coordinator.py

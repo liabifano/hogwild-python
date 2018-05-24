@@ -1,48 +1,30 @@
 import os
 
-# Path to the small English Reuters file
-RC_SMALL_TRAIN_PATH = os.path.join((os.sep)
-                                   .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
-                                   'resources/rcv1rcv2aminigoutte/EN/Index_EN-EN')
-
-# Path to the Large Reuters file
-RC_LARGE_TRAIN_PATH = os.path.join((os.sep)
-                                   .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
-                                   'resources/rcv1/lyrl2004_vectors_train.dat')
-RC_LARGE_LABELS_PATH = os.path.join((os.sep)
-                                    .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
-                                    'resources/rcv1/rcv1-v2.topics.qrels')
-RC_LARGE_TEST_PATH0 = os.path.join((os.sep)
-                                   .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
-                                   'resources/rcv1/lyrl2004_vectors_test_pt0.dat')
-RC_LARGE_TEST_PATH1 = os.path.join((os.sep)
-                                   .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
-                                   'resources/rcv1/lyrl2004_vectors_test_pt1.dat')
-RC_LARGE_TEST_PATH2 = os.path.join((os.sep)
-                                   .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
-                                   'resources/rcv1/lyrl2004_vectors_test_pt2.dat')
-RC_LARGE_TEST_PATH3 = os.path.join((os.sep)
-                                   .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
-                                   'resources/rcv1/lyrl2004_vectors_test_pt3.dat')
+LOCAL_PATH = os.path.join((os.sep)
+                          .join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[0:-2]),
+                          'resources/rcv1')
 
 # If testing locally, use localhost:port with different ports for each node/coordinator
 # When running on different machines, can use the same port for all.
-N_WORKERS = int(os.environ['N_WORKERS'])
-DATA_PATH = os.environ['DATA_PATH']
+RUNNING_WHERE = os.environ.get('WHERE') if os.environ.get('WHERE') else 'local'
 
-TRAIN_FILE = os.path.join(DATA_PATH, 'lyrl2004_vectors_train.dat')
+DATA_PATH = os.environ.get('DATA_PATH') if os.environ.get('DATA_PATH') else LOCAL_PATH
+N_WORKERS = os.environ.get('N_WORKERS')
+
+coordinator_address = 'coordinator-0.coordinator-service:80' if RUNNING_WHERE != 'local' else 'localhost:50051'
+node_addresses = ['worker-{}.workers-service:80'.format(str(x)) for x in
+                  range(N_WORKERS)] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053']
+port = 80 if RUNNING_WHERE != 'local' else 50051
+
+TRAIN_FILE = os.path.join(DATA_PATH, 'lyrl2004_vectors_train.dat') if DATA_PATH else ''
 TOPICS_FILE = os.path.join(DATA_PATH, 'rcv1-v2.topics.qrels')
 TEST_FILES = [os.path.join(DATA_PATH, x) for x in ['lyrl2004_vectors_test_pt0.dat',
                                                    'lyrl2004_vectors_test_pt1.dat',
                                                    'lyrl2004_vectors_test_pt2.dat',
                                                    'lyrl2004_vectors_test_pt3.dat']]
-LOGS_FILE = 'logs.txt'
+LOGS_FILE = 'logs/logs.txt'
 
-coordinator_hostname = 'coordinator-0.coordinator-service'
-node_hostnames = ['worker-{}.workers-service'.format(str(x)) for x in range(N_WORKERS)]
-port = 80
-
-running_mode = os.environ['RUNNING_MODE']  # Synchronous or asynchronous mode selection
+running_mode = os.environ.get('RUNNING_MODE') if os.environ.get('RUNNING_MODE') else 'synchronous'
 synchronous = running_mode == 'synchronous'
 
 learning_rate = 0.01  # Learning rate for SGD
