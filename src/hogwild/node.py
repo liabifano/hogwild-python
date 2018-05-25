@@ -8,6 +8,8 @@ from threading import Lock
 from hogwild import hogwild_pb2, hogwild_pb2_grpc
 from hogwild.svm import SVM
 from hogwild import ingest_data
+from time import sleep
+import json
 
 
 # Create a class to define the server functions
@@ -18,8 +20,6 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.node_addresses = []
         self.stubs = {}
 
-        self.data = []
-        self.targets = []
         self.learning_rate = 0
         self.lambda_reg = 0
         self.epochs = 0
@@ -43,6 +43,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.val_indices = request.val_indices
         print('Coordinator at {}'.format(self.coordinator_address))
         print('Other nodes at {}'.format(self.node_addresses))
+        # TODO: Remove it when it is asyncronous
         for node_addr in list(self.node_addresses) + [str(self.coordinator_address)]:
             channel = grpc.insecure_channel(node_addr)
             stub = hogwild_pb2_grpc.HogwildStub(channel)
@@ -117,7 +118,10 @@ if __name__ == "__main__":
                                                         train=True)
     data = [data[x] for x in range(len(targets)) if x not in hws.val_indices]
     targets = [targets[x] for x in range(len(targets)) if x not in hws.val_indices]
-    print('Number of training datapoints: {}'.format(len(hws.targets)))
+    print('HEREEEE')
+    print(len(data))
+    print(len(targets))
+    print('Number of training datapoints: {}'.format(len(targets)))
 
     # Wait to receive the start command from the coordinator
     while not hws.ready_to_calculate:
@@ -167,13 +171,27 @@ if __name__ == "__main__":
                     hws.all_delta_w = {}
 
             epoch += 1
+            with open('epochs_done.json', 'w') as outfile:
+                json.dump([{'last_epoch': epoch}], outfile)
+
+
         # Send message to all nodes that SGD has finished
         for stub in hws.stubs.values():
             ep_done = hogwild_pb2.EpochsDone()
             response = stub.GetEpochsDone(ep_done)
 
+        with open('other_nodes_epochs1.json', 'w') as outfile:
+            json.dump([{'last_epoch': hws.epochs_done,
+                        'len_stubs': len(hws.stubs)}], outfile)
+
+
         # Wait for message of all nodes that they also finished before quitting
         while not hws.epochs_done == len(hws.stubs) - 1:
+            with open('other_nodes_epochs1.json', 'w') as outfile:
+                json.dump([{'last_epoch': hws.epochs_done,
+                            'len_stubs': len(hws.stubs)}], outfile)
             pass
+
+        sleep(10000)
     except KeyboardInterrupt:
         server.stop(0)

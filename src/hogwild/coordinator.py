@@ -8,7 +8,7 @@ from hogwild import settings as s
 from hogwild.EarlyStopping import EarlyStopping
 from hogwild.node import HogwildServicer
 from hogwild.svm import SVM
-from time import time
+from time import time, sleep
 
 if __name__ == '__main__':
     # Step 1: Load the data from the reuters dataset and create targets
@@ -32,21 +32,17 @@ if __name__ == '__main__':
     # Step 2: Startup the nodes
     # addresses of all nodes and coordinator and the dataset to all worker nodes
     stubs = {}
-    # node_addresses = [u.ip(x, s.port) for x in s.node_hostnames]
+
     for i, node_addr in enumerate(s.node_addresses):
         # Open a gRPC channel
-        channel = grpc.insecure_channel(node_addr, options=[('grpc.max_message_length', 1024 * 1024 * 1024),
-                                                            ('grpc.max_send_message_length', 1024 * 1024 * 1024),
-                                                            ('grpc.max_receive_message_length', 1024 * 1024 * 1024)])
+        channel = grpc.insecure_channel(node_addr, options=[('grpc.max_message_length', 1024 * 1024 * 1024),('grpc.max_send_message_length', 1024 * 1024 * 1024),('grpc.max_receive_message_length', 1024 * 1024 * 1024)])
         # Create a stub (client)
         stub = hogwild_pb2_grpc.HogwildStub(channel)
         stubs[node_addr] = stub
         # Send to each node the list of all other nodes and the coordinator
         other_nodes = s.node_addresses.copy()
         other_nodes.remove(node_addr)
-        info = hogwild_pb2.NetworkInfo(coordinator_address=s.coordinator_address,
-                                       node_addresses=other_nodes,
-                                       val_indices=val_indices)
+        info = hogwild_pb2.NetworkInfo(coordinator_address=s.coordinator_address,node_addresses=other_nodes,val_indices=val_indices)
         response = stub.GetNodeInfo(info)
 
     # Step 3: Create a listener for the coordinator and send start command to all nodes
@@ -121,18 +117,37 @@ if __name__ == '__main__':
                                'loss_val': val_loss})
             print('Val loss: {:.4f}'.format(val_loss))
 
+            print('im stucked here! Nodes:{}, Epochs: {} and this is my loss {}'.format(len(s.node_addresses), hws.epochs_done, val_loss))
+
+
+
+
             # Check for early stopping
-            stopping_crit_reached = early_stopping.stopping_criterion(val_loss)
-            if stopping_crit_reached:
-                for stub in stubs.values():
-                    stop_msg = hogwild_pb2.StopMessage()
-                    response = stub.GetStopMessage(stop_msg)
+            # stopping_crit_reached = early_stopping.stopping_criterion(val_loss)
+            # if stopping_crit_reached:
+            #     for stub in stubs.values():
+            #         stop_msg = hogwild_pb2.StopMessage()
+            #         response = stub.GetStopMessage(stop_msg)
+
+
 
         print('All SGD epochs done!')
+
+        with open('log.json', 'w') as outfile:
+            json.dump([], outfile)
+
+        with open('epochs_done.json', 'w') as outfile:
+            json.dump([], outfile)
+
+
 
         # IF ASYNC
         if not s.synchronous:
             hws.svm.update_weights(hws.all_delta_w)
+
+        with open('if_not_syn_pass.json', 'w') as outfile:
+            json.dump([], outfile)
+
 
         prediction = hws.svm.predict(data_val)
         a = sum([1 for x in zip(targets_val, prediction) if x[0] == 1 and x[1] == 1])
@@ -144,6 +159,9 @@ if __name__ == '__main__':
         print('Val accuracy of Label -1: {:.2f}%'.format(c / d))
         print('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
 
+        with open('calculated_accc.json', 'w') as outfile:
+            json.dump([], outfile)
+
         t1 = time()
 
         log = [{'start_time': datetime.utcfromtimestamp(t0).strftime("%Y-%m-%d %H:%M:%S"),
@@ -154,14 +172,10 @@ if __name__ == '__main__':
                 'accuracy': utils.accuracy(targets_val, prediction),
                 'accuracy_1': a / b,
                 'accuracy_-1': c / d,
-                'losses_val': losses_val,
-                'tag': ''}]
+                'losses_val': losses_val}]
 
-        if s.RUNNING_WHERE == 'local':
-            pass
-        else:
-            with open('log.json', 'w') as outfile:
-                json.dump(log, outfile)
+        # with open('log.json', 'w') as outfile:
+        #     json.dump(log, outfile)
 
     except KeyboardInterrupt:
         server.stop(0)

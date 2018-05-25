@@ -25,14 +25,14 @@ fi;
 
 
 function shutdown_infra {
-    if ! [[ -z $(kubectl get services | grep workers-service) ]];
-    then
-        kubectl delete -f Kubernetes/workers.yaml --cascade=true
-    fi;
-
     if ! [[ -z $(kubectl get services | grep coordinator-service) ]];
     then
         kubectl delete -f Kubernetes/coordinator.yaml --cascade=true
+    fi;
+
+    if ! [[ -z $(kubectl get services | grep workers-service) ]];
+    then
+        kubectl delete -f Kubernetes/workers.yaml --cascade=true
     fi;
 
     if ! [[ -z $(kubectl get configmap | grep hogwild-config) ]];
@@ -56,14 +56,15 @@ docker push ${REPO}/${APP_NAME}
 
 echo
 echo
-echo "----- Starting Monitoring -----"
-bash monitor-it.sh &
+#echo "----- Starting Monitoring -----"
+#bash monitor-it.sh &
 
 echo
 echo "----- Starting workers -----"
 kubectl create configmap hogwild-config --from-literal=replicas=${N_WORKERS} \
                                         --from-literal=running_mode=${RUNNING_MODE} \
-                                        --from-literal=data_path=${DATA_PATH}
+                                        --from-literal=data_path=${DATA_PATH} \
+                                        --from-literal=running_where=${WHERE}
 sed "s/\(replicas:\)\(.*\)/\1 ${N_WORKERS}/" Kubernetes/workers_template.yaml > Kubernetes/workers.yaml
 kubectl create -f Kubernetes/workers.yaml
 
@@ -87,16 +88,10 @@ echo
 echo "----- Running Job -----"
 
 
-while [ $(kubectl get pods | grep coordinator | grep Running | wc -l) == 0 ]
-do
-    sleep 1
-done
-
-
-MY_TIME="`date +%Y%m%d%H%M%S`" && kubectl cp coordinator-0:logs.txt logs/log_${MY_TIME}.txt 2> /dev/null
+MY_TIME="`date +%Y%m%d%H%M%S`" && kubectl cp coordinator-0:log.json logs/log_${MY_TIME}.json 2> /dev/null
 while [ $? -ne 0 ];
 do
-    sleep 1
+    sleep 0.1
     MY_TIME="`date +%Y%m%d%H%M%S`" && kubectl cp coordinator-0:log.json logs/log_${MY_TIME}.json 2> /dev/null
 done
 
@@ -117,8 +112,8 @@ echo
 echo "----- Logs available in ${FILE_LOG} -----"
 
 echo
-echo "----- Shutting down monitoring -----"
-kill -9 $(ps -a | grep monitor-it |  awk '{print $1}' | head -n 1)
+#echo "----- Shutting down monitoring -----"
+#kill -9 $(ps -a | grep monitor-it |  awk '{print $1}' | head -n 1)
 
 echo
 echo "----- Shutting down infra -----"

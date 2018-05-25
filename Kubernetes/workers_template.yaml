@@ -50,6 +50,11 @@ spec:
                 configMapKeyRef:
                   name: hogwild-config
                   key: data_path
+            - name: WHERE
+              valueFrom:
+                configMapKeyRef:
+                  name: hogwild-config
+                  key: running_where
           ports:
             - containerPort: 80
               name: worker
