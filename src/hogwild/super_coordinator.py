@@ -73,17 +73,14 @@ if __name__ == '__main__':
     try:
         t0 = time()
         losses_val = []
+        n_epochs = 1
         while hws.epochs_done != len(s.node_addresses) and not stopping_crit_reached:
             # If SYNC
             if s.synchronous:
                 # Wait for the weight updates from all workers
-                while not (hws.wait_for_all_nodes_counter == len(s.node_addresses) or
-                           hws.epochs_done == len(s.node_addresses) or
-                           stopping_crit_reached):
+                while not hws.wait_for_all_nodes_counter == len(s.node_addresses):
                     pass
                 print('Node waiter passed')
-                if hws.epochs_done == len(s.node_addresses) or stopping_crit_reached:
-                    break
                 # Send accumulated weight update to all workers
                 for stub in stubs.values():
                     weight_update = hogwild_pb2.WeightUpdate(delta_w=hws.all_delta_w)
@@ -94,24 +91,26 @@ if __name__ == '__main__':
                 hws.all_delta_w = {}
                 hws.wait_for_all_nodes_counter = 0
                 # Wait for the ReadyToGo from all workers
-                while not (hws.ready_to_go_counter == len(s.node_addresses) or
-                           hws.epochs_done == len(s.node_addresses) or
-                           stopping_crit_reached):
+                while not hws.ready_to_go_counter == len(s.node_addresses):
                     pass
                 print('RTG waiter passed')
-                if hws.epochs_done == len(s.node_addresses) or stopping_crit_reached:
-                    break
                 # Send ReadyToGo to all workers
                 for stub in stubs.values():
                     rtg = hogwild_pb2.ReadyToGo()
                     response = stub.GetReadyToGo(rtg)
                 hws.ready_to_go_counter = 0
+                print('CEpoch {} done'.format(n_epochs))
+                if n_epochs == s.epochs:
+                    break
+                n_epochs += 1
 
             # If ASYNC
             else:
                 # Wait for sufficient number of weight updates
                 while len(hws.all_delta_w) < s.subset_size * len(s.node_addresses):
-                    pass
+                    if hws.epochs_done != len(s.node_addresses) or stopping_crit_reached:
+                        break
+                print(len(hws.all_delta_w))
                 with hws.weight_lock:
                     # Use accumulated weight updates from workers to update own weights
                     task_queue.put({'type': 'update_weights',
@@ -128,11 +127,11 @@ if __name__ == '__main__':
             print('Val loss: {:.4f}'.format(val_loss))
 
             # Check for early stopping
-            # stopping_crit_reached = early_stopping.stopping_criterion(val_loss)
-            # if stopping_crit_reached:
-            #     for stub in stubs.values():
-            #         stop_msg = hogwild_pb2.StopMessage()
-            #         response = stub.GetStopMessage(stop_msg)
+            stopping_crit_reached = early_stopping.stopping_criterion(val_loss)
+            if stopping_crit_reached:
+                for stub in stubs.values():
+                    stop_msg = hogwild_pb2.StopMessage()
+                    response = stub.GetStopMessage(stop_msg)
 
             print('Epochs done {}/{}'.format(hws.epochs_done, len(s.node_addresses)))
 

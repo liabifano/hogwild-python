@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     try:
         epoch = 1
-        while epoch < s.epochs and not hws.stop_msg_received:
+        while epoch <= s.epochs and not hws.stop_msg_received:
             print('Epoch {}'.format(epoch))
 
             # Send command to SVM process to calculate weight update and send
