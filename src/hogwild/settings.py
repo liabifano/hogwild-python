@@ -38,7 +38,7 @@ print(synchronous)
 
 learning_rate = 0.01 / len(node_addresses)  # Learning rate for SGD
 validation_split = 0.1  # Percentage of validation data
-epochs = 1000  # Number of training iterations over subset on each node
+epochs = 100  # Number of training iterations over subset on each node
 persistence = 20  # Abort if after so many epochs learning rate does not decrease
 subset_size = 100  # Number of datapoints to train on each epoch
 lambda_reg = 1e-5  # Regularization parameter
