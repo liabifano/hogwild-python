@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hogwild.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\rhogwild.proto\"\x07\n\x05\x45mpty\"W\n\x0bNetworkInfo\x12\x1b\n\x13\x63oordinator_address\x18\x01 \x01(\t\x12\x16\n\x0enode_addresses\x18\x02 \x03(\t\x12\x13\n\x0bval_indices\x18\x03 \x03(\x05\"\xb7\x01\n\x07\x44\x61taSet\x12&\n\ndatapoints\x18\x01 \x03(\x0b\x32\x12.DataSet.DataPoint\x1a\x83\x01\n\tDataPoint\x12\x34\n\tdatapoint\x18\x01 \x03(\x0b\x32!.DataSet.DataPoint.DatapointEntry\x12\x0e\n\x06target\x18\x02 \x01(\x05\x1a\x30\n\x0e\x44\x61tapointEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"k\n\x0cStartMessage\x12\x15\n\rlearning_rate\x18\x01 \x01(\x02\x12\x12\n\nlambda_reg\x18\x02 \x01(\x02\x12\x0e\n\x06\x65pochs\x18\x03 \x01(\x05\x12\x13\n\x0bsubset_size\x18\x04 \x01(\x05\x12\x0b\n\x03\x64im\x18\x05 \x01(\x05\"i\n\x0cWeightUpdate\x12*\n\x07\x64\x65lta_w\x18\x01 \x03(\x0b\x32\x19.WeightUpdate.DeltaWEntry\x1a-\n\x0b\x44\x65ltaWEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0b\n\tReadyToGo\"\x0c\n\nEpochsDone\"\r\n\x0bStopMessage2\xf9\x01\n\x07Hogwild\x12%\n\x0bGetNodeInfo\x12\x0c.NetworkInfo\x1a\x06.Empty\"\x00\x12#\n\x08StartSGD\x12\r.StartMessage\x1a\x06.Empty\"\x00\x12*\n\x0fGetWeightUpdate\x12\r.WeightUpdate\x1a\x06.Empty\"\x00\x12$\n\x0cGetReadyToGo\x12\n.ReadyToGo\x1a\x06.Empty\"\x00\x12&\n\rGetEpochsDone\x12\x0b.EpochsDone\x1a\x06.Empty\"\x00\x12(\n\x0eGetStopMessage\x12\x0c.StopMessage\x1a\x06.Empty\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\rhogwild.proto\"\x07\n\x05\x45mpty\"W\n\x0bNetworkInfo\x12\x1b\n\x13\x63oordinator_address\x18\x01 \x01(\t\x12\x16\n\x0enode_addresses\x18\x02 \x03(\t\x12\x13\n\x0bval_indices\x18\x03 \x03(\x05\"\xb7\x01\n\x07\x44\x61taSet\x12&\n\ndatapoints\x18\x01 \x03(\x0b\x32\x12.DataSet.DataPoint\x1a\x83\x01\n\tDataPoint\x12\x34\n\tdatapoint\x18\x01 \x03(\x0b\x32!.DataSet.DataPoint.DatapointEntry\x12\x0e\n\x06target\x18\x02 \x01(\x05\x1a\x30\n\x0e\x44\x61tapointEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0e\n\x0cStartMessage\"i\n\x0cWeightUpdate\x12*\n\x07\x64\x65lta_w\x18\x01 \x03(\x0b\x32\x19.WeightUpdate.DeltaWEntry\x1a-\n\x0b\x44\x65ltaWEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0b\n\tReadyToGo\"\x0c\n\nEpochsDone\"\r\n\x0bStopMessage2\xf9\x01\n\x07Hogwild\x12%\n\x0bGetNodeInfo\x12\x0c.NetworkInfo\x1a\x06.Empty\"\x00\x12#\n\x08StartSGD\x12\r.StartMessage\x1a\x06.Empty\"\x00\x12*\n\x0fGetWeightUpdate\x12\r.WeightUpdate\x1a\x06.Empty\"\x00\x12$\n\x0cGetReadyToGo\x12\n.ReadyToGo\x1a\x06.Empty\"\x00\x12&\n\rGetEpochsDone\x12\x0b.EpochsDone\x1a\x06.Empty\"\x00\x12(\n\x0eGetStopMessage\x12\x0c.StopMessage\x1a\x06.Empty\"\x00\x62\x06proto3')
 )
 
 
@@ -206,41 +206,6 @@ _STARTMESSAGE = _descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
-    _descriptor.FieldDescriptor(
-      name='learning_rate', full_name='StartMessage.learning_rate', index=0,
-      number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='lambda_reg', full_name='StartMessage.lambda_reg', index=1,
-      number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='epochs', full_name='StartMessage.epochs', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='subset_size', full_name='StartMessage.subset_size', index=3,
-      number=4, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='dim', full_name='StartMessage.dim', index=4,
-      number=5, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -254,7 +219,7 @@ _STARTMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=301,
-  serialized_end=408,
+  serialized_end=315,
 )
 
 
@@ -291,8 +256,8 @@ _WEIGHTUPDATE_DELTAWENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=470,
-  serialized_end=515,
+  serialized_start=377,
+  serialized_end=422,
 )
 
 _WEIGHTUPDATE = _descriptor.Descriptor(
@@ -321,8 +286,8 @@ _WEIGHTUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=410,
-  serialized_end=515,
+  serialized_start=317,
+  serialized_end=422,
 )
 
 
@@ -345,8 +310,8 @@ _READYTOGO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=517,
-  serialized_end=528,
+  serialized_start=424,
+  serialized_end=435,
 )
 
 
@@ -369,8 +334,8 @@ _EPOCHSDONE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=530,
-  serialized_end=542,
+  serialized_start=437,
+  serialized_end=449,
 )
 
 
@@ -393,8 +358,8 @@ _STOPMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=544,
-  serialized_end=557,
+  serialized_start=451,
+  serialized_end=464,
 )
 
 _DATASET_DATAPOINT_DATAPOINTENTRY.containing_type = _DATASET_DATAPOINT
@@ -505,8 +470,8 @@ _HOGWILD = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=560,
-  serialized_end=809,
+  serialized_start=467,
+  serialized_end=716,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetNodeInfo',

@@ -16,13 +16,7 @@ message DataSet {
     repeated DataPoint datapoints = 1;
 }
 
-message StartMessage {
-    float learning_rate = 1;
-    float lambda_reg = 2;
-    int32 epochs = 3;
-    int32 subset_size = 4;
-    int32 dim = 5;
-}
+message StartMessage {}
 
 message WeightUpdate {
     map<int32, float> delta_w = 1;
