@@ -6,6 +6,7 @@ message NetworkInfo {
     string coordinator_address = 1;
     repeated string node_addresses = 2;
     repeated int32 val_indices = 3;
+    int32 worker_idx = 4;
 }
 
 message DataSet {
@@ -20,7 +21,12 @@ message StartMessage {}
 
 message WeightUpdate {
     map<int32, float> delta_w = 1;
-//    map<int32, float> train_loss = 2;
+}
+
+message LossMessage {
+    float loss = 1;
+    float timestamp = 2;
+    int32 worker_idx = 3;
 }
 
 message ReadyToGo {}
@@ -36,4 +42,5 @@ service Hogwild {
     rpc GetReadyToGo (ReadyToGo) returns (Empty) {}
     rpc GetEpochsDone (EpochsDone) returns (Empty) {}
     rpc GetStopMessage (StopMessage) returns (Empty) {}
+    rpc GetLossMessage (LossMessage) returns (Empty) {}
 }

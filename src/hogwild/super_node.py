@@ -9,7 +9,8 @@ from hogwild import hogwild_pb2, hogwild_pb2_grpc
 from hogwild.HogwildServicer import HogwildServicer
 from hogwild.svm import SVM, svm_subprocess
 from hogwild import ingest_data
-from time import sleep
+from time import time
+from datetime import datetime
 import json
 
 
@@ -53,8 +54,11 @@ if __name__ == "__main__":
             # Send command to SVM process to calculate weight update and send
             # to coordinator (and all nodes if asynchronous)
             task_queue.put({'type': 'calculate_svm_update'})
-            delta_w = response_queue.get()
-            #response_queue.task_done()
+            response = response_queue.get()
+            delta_w = response['total_delta_w']
+            train_loss = response['train_loss']
+            timestamp = time()
+
             # Send weight update to coordinator
             weight_update = hogwild_pb2.WeightUpdate(delta_w=delta_w)
             response = hws.stubs[hws.coordinator_address].GetWeightUpdate(weight_update)
@@ -64,6 +68,9 @@ if __name__ == "__main__":
                     weight_update = hogwild_pb2.WeightUpdate(delta_w=delta_w)
                     response = stub.GetWeightUpdate(weight_update)
 
+            # Send current train loss to coordinator
+            loss_msg = hogwild_pb2.LossMessage(loss=train_loss, timestamp=timestamp, worker_idx=hws.worker_idx)
+            response = hws.stubs[hws.coordinator_address].GetLossMessage(loss_msg)
 
 
             # If SYNC communicate only with coordinator
@@ -125,6 +132,5 @@ if __name__ == "__main__":
             #                 'len_stubs': len(hws.stubs)}], outfile)
             pass
 
-        # sleep(10000)
     except KeyboardInterrupt:
         server.stop(0)

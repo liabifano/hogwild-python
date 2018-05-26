@@ -34,8 +34,8 @@ if __name__ == '__main__':
         # Send to each node the list of all other nodes and the coordinator
         other_nodes = s.node_addresses.copy()
         other_nodes.remove(node_addr)
-        # TODO: Maybe remove and pull from settings
-        info = hogwild_pb2.NetworkInfo(coordinator_address=s.coordinator_address,node_addresses=other_nodes,val_indices=val_indices)
+        info = hogwild_pb2.NetworkInfo(coordinator_address=s.coordinator_address, node_addresses=other_nodes,
+                                       val_indices=val_indices, worker_idx=i)
         response = stub.GetNodeInfo(info)
 
     # Create queues for communication with the SVM process
@@ -80,7 +80,6 @@ if __name__ == '__main__':
                 # Wait for the weight updates from all workers
                 while not hws.wait_for_all_nodes_counter == len(s.node_addresses):
                     pass
-                print('Node waiter passed')
                 # Send accumulated weight update to all workers
                 for stub in stubs.values():
                     weight_update = hogwild_pb2.WeightUpdate(delta_w=hws.all_delta_w)
@@ -93,7 +92,6 @@ if __name__ == '__main__':
                 # Wait for the ReadyToGo from all workers
                 while not hws.ready_to_go_counter == len(s.node_addresses):
                     pass
-                print('RTG waiter passed')
                 # Send ReadyToGo to all workers
                 for stub in stubs.values():
                     rtg = hogwild_pb2.ReadyToGo()
@@ -108,7 +106,7 @@ if __name__ == '__main__':
             else:
                 # Wait for sufficient number of weight updates
                 while len(hws.all_delta_w) < s.subset_size * len(s.node_addresses):
-                    if hws.epochs_done != len(s.node_addresses) or stopping_crit_reached:
+                    if hws.epochs_done == len(s.node_addresses) or stopping_crit_reached:
                         break
                 print(len(hws.all_delta_w))
                 with hws.weight_lock:
@@ -180,7 +178,8 @@ if __name__ == '__main__':
                 'accuracy': utils.accuracy(targets_val, prediction),
                 'accuracy_1': a / b,
                 'accuracy_-1': c / d,
-                'losses_val': losses_val}]
+                'losses_val': losses_val,
+                'losses_train': hws.train_losses}]
 
         with open('log.json', 'w') as outfile:
             json.dump(log, outfile)
