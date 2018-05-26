@@ -37,12 +37,7 @@ if __name__ == "__main__":
     # Create queues for communication with the SVM process
     task_queue = multiprocessing.Queue()
     response_queue = multiprocessing.Queue()
-    # Extract worker and coordinator stubs
-    worker_stubs = [hws.stubs[node_addr] for node_addr in hws.node_addresses]
-    coordinator_stub = hws.stubs[hws.coordinator_address]
-    import pdb; pdb.set_trace()
-    print(hws.coordinator_address)
-    svm_proc = multiprocessing.Process(target=svm_subprocess, args=(task_queue, response_queue, hws.val_indices, worker_stubs, coordinator_stub))
+    svm_proc = multiprocessing.Process(target=svm_subprocess, args=(task_queue, response_queue, hws.val_indices))
     svm_proc.start()
 
     # Wait to receive the start command from the coordinator
@@ -58,7 +53,18 @@ if __name__ == "__main__":
             # Send command to SVM process to calculate weight update and send
             # to coordinator (and all nodes if asynchronous)
             task_queue.put({'type': 'calculate_svm_update'})
-            print('Queue put 111111')
+            delta_w = response_queue.get()
+            #response_queue.task_done()
+            # Send weight update to coordinator
+            weight_update = hogwild_pb2.WeightUpdate(delta_w=delta_w)
+            response = hws.stubs[hws.coordinator_address].GetWeightUpdate(weight_update)
+            # If ASYNC, send weight update to all workers
+            if not s.synchronous:
+                for stub in [hws.stubs[node_addr] for node_addr in hws.node_addresses]:
+                    weight_update = hogwild_pb2.WeightUpdate(delta_w=delta_w)
+                    response = stub.GetWeightUpdate(weight_update)
+
+
 
             # If SYNC communicate only with coordinator
             if s.synchronous:
@@ -66,7 +72,6 @@ if __name__ == "__main__":
                 while not hws.wait_for_all_nodes_counter == 1:
                     pass
                 hws.wait_for_all_nodes_counter = 0
-                print('Not Queue put 111111')
 
                 # Use accumulated weight updates from other nodes to update own weights
                 task_queue.put({'type': 'update_weights',

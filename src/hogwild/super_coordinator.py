@@ -7,7 +7,7 @@ from datetime import datetime
 from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data, utils
 from hogwild import settings as s
 from hogwild.EarlyStopping import EarlyStopping
-from hogwild.node import HogwildServicer
+from hogwild.HogwildServicer import HogwildServicer
 from hogwild.svm import SVM, svm_subprocess
 from time import time, sleep
 
@@ -41,9 +41,7 @@ if __name__ == '__main__':
     # Create queues for communication with the SVM process
     task_queue = multiprocessing.Queue()
     response_queue = multiprocessing.Queue()
-    # Extract worker and coordinator stubs
-    worker_stubs = [stubs[node_addr] for node_addr in s.node_addresses]
-    svm_proc = multiprocessing.Process(target=svm_subprocess, args=(task_queue, response_queue, val_indices, worker_stubs, None)) # TODO: None
+    svm_proc = multiprocessing.Process(target=svm_subprocess, args=(task_queue, response_queue, val_indices)) # TODO: None
     svm_proc.start()
 
     # Step 3: Create a listener for the coordinator and send start command to all nodes
@@ -79,8 +77,13 @@ if __name__ == '__main__':
             # If SYNC
             if s.synchronous:
                 # Wait for the weight updates from all workers
-                while not hws.wait_for_all_nodes_counter == len(s.node_addresses):
+                while not (hws.wait_for_all_nodes_counter == len(s.node_addresses) or
+                           hws.epochs_done == len(s.node_addresses) or
+                           stopping_crit_reached):
                     pass
+                print('Node waiter passed')
+                if hws.epochs_done == len(s.node_addresses) or stopping_crit_reached:
+                    break
                 # Send accumulated weight update to all workers
                 for stub in stubs.values():
                     weight_update = hogwild_pb2.WeightUpdate(delta_w=hws.all_delta_w)
@@ -91,8 +94,13 @@ if __name__ == '__main__':
                 hws.all_delta_w = {}
                 hws.wait_for_all_nodes_counter = 0
                 # Wait for the ReadyToGo from all workers
-                while not hws.ready_to_go_counter == len(s.node_addresses):
+                while not (hws.ready_to_go_counter == len(s.node_addresses) or
+                           hws.epochs_done == len(s.node_addresses) or
+                           stopping_crit_reached):
                     pass
+                print('RTG waiter passed')
+                if hws.epochs_done == len(s.node_addresses) or stopping_crit_reached:
+                    break
                 # Send ReadyToGo to all workers
                 for stub in stubs.values():
                     rtg = hogwild_pb2.ReadyToGo()
@@ -113,7 +121,7 @@ if __name__ == '__main__':
             # Calculate validation loss
             task_queue.put({'type': 'calculate_val_loss'})
             val_loss = response_queue.get()
-            response_queue.task_done()
+            #response_queue.task_done()
 
             losses_val.append({'time': datetime.utcfromtimestamp(time()).strftime("%Y-%m-%d %H:%M:%S"),
                                'loss_val': val_loss})
@@ -126,6 +134,7 @@ if __name__ == '__main__':
             #         stop_msg = hogwild_pb2.StopMessage()
             #         response = stub.GetStopMessage(stop_msg)
 
+            print('Epochs done {}/{}'.format(hws.epochs_done, len(s.node_addresses)))
 
         print('All SGD epochs done!')
 
@@ -134,10 +143,24 @@ if __name__ == '__main__':
             task_queue.put({'type': 'update_weights',
                             'all_delta_w': hws.all_delta_w})
 
+
+
+        ### TEMP
+
+        data, targets = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
+                                                            s.TOPICS_FILE,
+                                                            s.TEST_FILES,
+                                                            selected_cat='CCAT',
+                                                            train=True)
+        data_val = [data[x] for x in val_indices]
+        targets_val = [targets[x] for x in val_indices]
+
+        ### TEMP
+
         # Calculate the predictions on the validation set
         task_queue.put({'type': 'predict', 'values': data_val})
         prediction = response_queue.get()
-        response_queue.task_done()
+        #response_queue.task_done()
 
         a = sum([1 for x in zip(targets_val, prediction) if x[0] == 1 and x[1] == 1])
         b = sum([1 for x in targets_val if x == 1])

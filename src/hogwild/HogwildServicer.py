@@ -45,7 +45,6 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         return response
 
     def GetWeightUpdate(self, request, context):
-        print('Got weight update')
         with self.weight_lock:
             for k, v in dict(request.delta_w).items():
                 if k in self.all_delta_w:

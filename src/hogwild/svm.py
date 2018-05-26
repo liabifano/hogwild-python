@@ -4,6 +4,7 @@ import multiprocessing
 import random
 from hogwild import settings as s
 from hogwild import hogwild_pb2, hogwild_pb2_grpc
+import grpc
 
 
 class SVM:
@@ -80,7 +81,7 @@ class SVM:
         return [sign(dotproduct(x, self.__w)) for x in data]
 
 
-def svm_subprocess(task_queue, response_queue, val_indices, worker_stubs, coordinator_stub):    
+def svm_subprocess(task_queue, response_queue, val_indices):
     print('Loading training data')
     data, targets = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
                                                         s.TOPICS_FILE,
@@ -101,47 +102,32 @@ def svm_subprocess(task_queue, response_queue, val_indices, worker_stubs, coordi
         next_task = task_queue.get()
         if next_task is None:
             # Poison pill means shutdown
-            print('Got poison pill. Exiting SVM subprocess.')
-            task_queue.task_done()
+            print('SVM subprocess got poison pill. Exiting from subprocess.')
             break
 
         # Tasks are dictionaries: {'type': 'foo', 'payload': bar}
         task_type = next_task['type']
         if task_type == 'calculate_svm_update':
-            print('calculate_svm_update')
             # Select random subset
             subset_indices = random.sample(range(len(targets_train)), s.subset_size)
             data_stoc = [data_train[x] for x in subset_indices]
             targets_stoc = [targets_train[x] for x in subset_indices]
             # Calculate weight updates
             total_delta_w = svm.fit(data_stoc, targets_stoc, update=not s.synchronous) # TODO: add train loss term
-            # Send weight update to coordinator
-            print(dir(coordinator_stub))
-            weight_update = hogwild_pb2.WeightUpdate(delta_w=total_delta_w)
-            response = coordinator_stub.GetWeightUpdate(weight_update)
-            # If ASYNC, send weight update to all workers
-            if not s.synchronous:
-                for stub in worker_stubs:
-                    weight_update = hogwild_pb2.WeightUpdate(delta_w=total_delta_w)
-                    response = stub.GetWeightUpdate(weight_update)
+            response_queue.put(total_delta_w)
 
             # TODO: Send train loss to coordinator (with id?)
 
         elif task_type == 'update_weights':
-            print('update_weights')
             svm.update_weights(next_task['all_delta_w'])
 
 
         elif task_type == 'calculate_val_loss':
-            print('calculate_val_loss')
             val_loss = svm.loss(data_val, targets_val)
-            response_queue.put({'type': 'val_loss', 'val_loss': val_loss})
+            response_queue.put(val_loss)
 
 
         elif task_type == 'predict':
-            print('predict')
             values = next_task['values']
             preds = svm.predict(values)
-            response_queue.put({'type': 'predictions', 'predictions': preds})
-
-        task_queue.task_done()
+            response_queue.put(preds)

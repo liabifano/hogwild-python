@@ -16,8 +16,8 @@ print(N_WORKERS)
 
 coordinator_address = 'coordinator-0.coordinator-service:80' if RUNNING_WHERE != 'local' else 'localhost:50051'
 node_addresses = ['worker-{}.workers-service:80'.format(str(x)) for x in
-                  range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053']
-                                                                           # 'localhost:50054', 'localhost:50055',
+                  range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
+                                                                           'localhost:50054', 'localhost:50055']
                                                                            # 'localhost:50056', 'localhost:50057',
                                                                            # 'localhost:50058', 'localhost:50059',
                                                                            # 'localhost:50060', 'localhost:50061']
