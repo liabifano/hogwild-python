@@ -74,10 +74,9 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         return response
 
     def GetLossMessage(self, request, context):
-        print('Got loss {} from worker {}'.format(request.loss, request.worker_idx))
         loss_log = {'worker_idx': request.worker_idx,
                     'loss_train': request.loss,
-                    'time': datetime.utcfromtimestamp(request.timestamp).strftime("%Y-%m-%d %H:%M:%S")}
+                    'time': request.timestamp}
         self.train_losses.append(loss_log)
         response = hogwild_pb2.Empty()
         return response

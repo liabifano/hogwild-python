@@ -25,7 +25,7 @@ message WeightUpdate {
 
 message LossMessage {
     float loss = 1;
-    float timestamp = 2;
+    string timestamp = 2;
     int32 worker_idx = 3;
 }
 

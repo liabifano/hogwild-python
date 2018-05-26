@@ -120,7 +120,7 @@ if __name__ == '__main__':
             val_loss = response_queue.get()
             #response_queue.task_done()
 
-            losses_val.append({'time': datetime.utcfromtimestamp(time()).strftime("%Y-%m-%d %H:%M:%S"),
+            losses_val.append({'time': datetime.utcfromtimestamp(time()).strftime("%Y-%m-%d %H:%M:%S.%f"),
                                'loss_val': val_loss})
             print('Val loss: {:.4f}'.format(val_loss))
 
@@ -170,8 +170,8 @@ if __name__ == '__main__':
 
         t1 = time()
 
-        log = [{'start_time': datetime.utcfromtimestamp(t0).strftime("%Y-%m-%d %H:%M:%S"),
-                'end_time': datetime.utcfromtimestamp(t1).strftime("%Y-%m-%d %H:%M:%S"),
+        log = [{'start_time': datetime.utcfromtimestamp(t0).strftime("%Y-%m-%d %H:%M:%S.%f"),
+                'end_time': datetime.utcfromtimestamp(t1).strftime("%Y-%m-%d %H:%M:%S.%f"),
                 'running_time': t1 - t0,
                 'n_workers': s.N_WORKERS,
                 'running_mode': s.running_mode,

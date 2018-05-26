@@ -57,7 +57,10 @@ if __name__ == "__main__":
             response = response_queue.get()
             delta_w = response['total_delta_w']
             train_loss = response['train_loss']
-            timestamp = time()
+            timestamp = datetime.utcfromtimestamp(time()).strftime("%Y-%m-%d %H:%M:%S.%f")
+            # Send current train loss to coordinator
+            loss_msg = hogwild_pb2.LossMessage(loss=train_loss, timestamp=timestamp, worker_idx=hws.worker_idx)
+            response = hws.stubs[hws.coordinator_address].GetLossMessage(loss_msg)
 
             # Send weight update to coordinator
             weight_update = hogwild_pb2.WeightUpdate(delta_w=delta_w)
@@ -67,11 +70,6 @@ if __name__ == "__main__":
                 for stub in [hws.stubs[node_addr] for node_addr in hws.node_addresses]:
                     weight_update = hogwild_pb2.WeightUpdate(delta_w=delta_w)
                     response = stub.GetWeightUpdate(weight_update)
-
-            # Send current train loss to coordinator
-            loss_msg = hogwild_pb2.LossMessage(loss=train_loss, timestamp=timestamp, worker_idx=hws.worker_idx)
-            response = hws.stubs[hws.coordinator_address].GetLossMessage(loss_msg)
-
 
             # If SYNC communicate only with coordinator
             if s.synchronous:
