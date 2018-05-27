@@ -25,19 +25,19 @@ fi;
 
 
 function shutdown_infra {
-    if ! [[ -z $(kubectl get services | grep coordinator-service-roman) ]];
+    if ! [[ -z $(kubectl get services | grep coordinator-service) ]];
     then
         kubectl delete -f Kubernetes/coordinator.yaml --cascade=true
     fi;
 
-    if ! [[ -z $(kubectl get services | grep workers-service-roman) ]];
+    if ! [[ -z $(kubectl get services | grep workers-service) ]];
     then
         kubectl delete -f Kubernetes/workers.yaml --cascade=true
     fi;
 
-    if ! [[ -z $(kubectl get configmap | grep hogwild-config-roman) ]];
+    if ! [[ -z $(kubectl get configmap | grep hogwild-config) ]];
     then
-        kubectl delete configmap hogwild-config-roman
+        kubectl delete configmap hogwild-config
     fi;
 }
 
@@ -61,7 +61,7 @@ echo
 
 echo
 echo "----- Starting workers -----"
-kubectl create configmap hogwild-config-roman --from-literal=replicas=${N_WORKERS} \
+kubectl create configmap hogwild-config --from-literal=replicas=${N_WORKERS} \
                                             --from-literal=running_mode=${RUNNING_MODE} \
                                             --from-literal=data_path=${DATA_PATH} \
                                             --from-literal=running_where=${WHERE}

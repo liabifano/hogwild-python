@@ -65,7 +65,7 @@ spec:
           ports:
             - containerPort: 80
               name: worker
-          command: ["python", "hogwild-python/src/hogwild/node.py", "80"]
+          command: ["python", "hogwild-python/src/hogwild/worker.py", "80"]
           volumeMounts:
             - name: shared-volume
               mountPath: /data
