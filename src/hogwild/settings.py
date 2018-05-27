@@ -11,12 +11,12 @@ DATA_PATH = os.environ.get('DATA_PATH') if os.environ.get('DATA_PATH') else LOCA
 N_WORKERS = os.environ.get('N_WORKERS')
 
 coordinator_address = 'coordinator-roman-0.coordinator-service-roman:80' if RUNNING_WHERE != 'local' else 'localhost:50051'
-node_addresses = ['worker-roman-{}.workers-service-roman:80'.format(str(x)) for x in
-                  range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
-                                                                           'localhost:50054', 'localhost:50055']
-                                                                           # 'localhost:50056', 'localhost:50057',
-                                                                           # 'localhost:50058', 'localhost:50059',
-                                                                           # 'localhost:50060', 'localhost:50061']
+worker_addresses = ['worker-roman-{}.workers-service-roman:80'.format(str(x)) for x in
+                    range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
+                                                                             'localhost:50054', 'localhost:50055']
+                                                                             # 'localhost:50056', 'localhost:50057',
+                                                                             # 'localhost:50058', 'localhost:50059',
+                                                                             # 'localhost:50060', 'localhost:50061']
 port = 80 if RUNNING_WHERE != 'local' else 50051
 
 TRAIN_FILE = os.path.join(DATA_PATH, 'lyrl2004_vectors_train.dat') if DATA_PATH else ''
@@ -29,7 +29,7 @@ TEST_FILES = [os.path.join(DATA_PATH, x) for x in ['lyrl2004_vectors_test_pt0.da
 running_mode = os.environ.get('RUNNING_MODE') if os.environ.get('RUNNING_MODE') else 'synchronous'
 synchronous = running_mode == 'synchronous'
 
-learning_rate = 0.05 / len(worker_addresses)  # Learning rate for SGD
+learning_rate = 0.01 / len(worker_addresses)  # Learning rate for SGD
 validation_split = 0.1  # Percentage of validation data
 epochs = 100  # Number of training iterations over subset on each node
 persistence = 15  # Abort if after so many epochs learning rate does not decrease
