@@ -13,6 +13,8 @@ from time import time, sleep
 
 
 if __name__ == '__main__':
+    from time import sleep
+    # sleep(100000)
     # Step 1: Load the data from the reuters dataset and create targets
     print('Data path:', s.TRAIN_FILE)
     dataset_size = sum(1 for line in open(s.TRAIN_FILE))
@@ -78,7 +80,11 @@ if __name__ == '__main__':
             # If SYNC
             if s.synchronous:
                 # Wait for the weight updates from all workers
+                print(len(s.node_addresses))
+                print(s.node_addresses)
+                print(s.coordinator_address)
                 while not hws.wait_for_all_nodes_counter == len(s.node_addresses):
+                    # print('waiting_all_nodes')
                     pass
                 # Send accumulated weight update to all workers
                 for stub in stubs.values():
@@ -179,7 +185,8 @@ if __name__ == '__main__':
                 'accuracy_1': a / b,
                 'accuracy_-1': c / d,
                 'losses_val': losses_val,
-                'losses_train': hws.train_losses}]
+                'losses_train': hws.train_losses,
+                'n_epochs': n_epochs}]
 
         with open('log.json', 'w') as outfile:
             json.dump(log, outfile)
