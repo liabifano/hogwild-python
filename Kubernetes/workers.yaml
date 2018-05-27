@@ -2,62 +2,62 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: workers-service
+  name: workers-service-roman
   labels:
-    app: workers-service
+    app: workers-service-roman
 spec:
   ports:
     - port: 80
-      name: worker
+      name: worker-roman
   clusterIP: None
   selector:
-    app: workers-service
+    app: workers-service-roman
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: worker
+  name: worker-roman
   labels:
-    app: workers-service
+    app: workers-service-roman
 spec:
-  serviceName: "workers-service"
+  serviceName: "workers-service-roman"
   podManagementPolicy: Parallel
   selector:
     matchLabels:
-      app: workers-service
+      app: workers-service-roman
   replicas: 2
   template:
     metadata:
       labels:
-        app: workers-service
+        app: workers-service-roman
     spec:
       containers:
-        - name: workers-service
+        - name: workers-service-roman
           image: liabifano/hogwild:latest
           env:
             - name: N_WORKERS
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: replicas
             - name: RUNNING_MODE
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: running_mode
             - name: DATA_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: data_path
             - name: WHERE
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: running_where
           ports:
             - containerPort: 80
-              name: worker
+              name: worker-roman
           command: ["python", "hogwild-python/src/hogwild/super_node.py", "80"]
           volumeMounts:
             - name: shared-volume

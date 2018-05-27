@@ -2,69 +2,62 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: coordinator-service
+  name: coordinator-service-roman
   labels:
-    app: coordinator-service
+    app: coordinator-service-roman
 spec:
   ports:
     - port: 80
-      name: coordinator
+      name: coordinator-roman
   clusterIP: None
   selector:
-    app: coordinator-service
+    app: coordinator-service-roman
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: coordinator
+  name: coordinator-roman
   labels:
-    app: coordinator-service
+    app: coordinator-service-roman
 spec:
-  serviceName: "coordinator-service"
+  serviceName: "coordinator-service-roman"
   podManagementPolicy: Parallel
   selector:
     matchLabels:
-      app: coordinator-service
+      app: coordinator-service-roman
   replicas: 1
   template:
     metadata:
       labels:
-        app: coordinator-service
+        app: coordinator-service-roman
     spec:
       containers:
-        - name: coordinator-service
+        - name: coordinator-service-roman
           image: liabifano/hogwild:latest
           env:
             - name: N_WORKERS
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: replicas
             - name: RUNNING_MODE
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: running_mode
             - name: DATA_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: data_path
             - name: WHERE
               valueFrom:
                 configMapKeyRef:
-                  name: hogwild-config
+                  name: hogwild-config-roman
                   key: running_where
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "1000m"
           ports:
             - containerPort: 80
-              name: coordinator
+              name: coordinator-roman
           command: ["python", "hogwild-python/src/hogwild/super_coordinator.py"]
           volumeMounts:
             - name: shared-volume

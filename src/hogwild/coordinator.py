@@ -160,7 +160,7 @@ if __name__ == '__main__':
         print('Val accuracy: {:.2f}%'.format(acc_tot_val))
 
         # Load the test dataset
-        print('Loading test set to calculate final accuracies')
+        print('Loading test set')
         data_test, targets_test = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
                                                                       s.TOPICS_FILE,
                                                                       s.TEST_FILES,
