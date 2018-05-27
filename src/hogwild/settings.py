@@ -29,7 +29,7 @@ TEST_FILES = [os.path.join(DATA_PATH, x) for x in ['lyrl2004_vectors_test_pt0.da
 running_mode = os.environ.get('RUNNING_MODE') if os.environ.get('RUNNING_MODE') else 'synchronous'
 synchronous = running_mode == 'synchronous'
 
-learning_rate = 0.01 / len(worker_addresses)  # Learning rate for SGD
+learning_rate = 0.03 / len(worker_addresses)  # Learning rate for SGD
 validation_split = 0.1  # Percentage of validation data
 epochs = 100  # Number of training iterations over subset on each node
 persistence = 15  # Abort if after so many epochs learning rate does not decrease
