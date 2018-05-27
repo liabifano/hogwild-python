@@ -55,6 +55,13 @@ spec:
                 configMapKeyRef:
                   name: hogwild-config
                   key: running_where
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 80
               name: coordinator

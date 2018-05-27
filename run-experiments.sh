@@ -25,17 +25,17 @@ fi;
 
 
 function shutdown_infra {
-    if ! [[ -z $(kubectl get services | grep coordinator-service) ]];
+    if ! [[ -z $(kubectl get services | grep coordinator-service 2> /dev/null) ]];
     then
         kubectl delete -f Kubernetes/coordinator.yaml --cascade=true
     fi;
 
-    if ! [[ -z $(kubectl get services | grep workers-service) ]];
+    if ! [[ -z $(kubectl get services | grep workers-service 2> /dev/null) ]];
     then
         kubectl delete -f Kubernetes/workers.yaml --cascade=true
     fi;
 
-    if ! [[ -z $(kubectl get configmap | grep hogwild-config) ]];
+    if ! [[ -z $(kubectl get configmap | grep hogwild-config 2> /dev/null) ]];
     then
         kubectl delete configmap hogwild-config
     fi;
@@ -88,36 +88,9 @@ echo
 echo "----- Running Job -----"
 
 
-MY_TIME="`date +%Y%m%d%H%M%S`" && kubectl cp coordinator-0:log.json logs/log_${MY_TIME}.json 2> /dev/null
-while [ $? -ne 0 ];
-do
-    sleep 0.1
-    MY_TIME="`date +%Y%m%d%H%M%S`" && kubectl cp coordinator-0:log.json logs/log_${MY_TIME}.json 2> /dev/null
-done
 
 
-echo
-echo "----- Job Completed, writing log -----"
 
-
-if [[ -z $(ls logs | grep ${FILE_LOG}) ]];
-then
-    touch logs/${FILE_LOG}
-fi;
-
-echo $(jq -s add logs/${FILE_LOG} logs/log_${MY_TIME}.json) > logs/${FILE_LOG}
-rm logs/log_${MY_TIME}.json
-
-echo
-echo "----- Logs available in ${FILE_LOG} -----"
-
-echo
-#echo "----- Shutting down monitoring -----"
-#kill -9 $(ps -a | grep monitor-it |  awk '{print $1}' | head -n 1)
-
-echo
-echo "----- Shutting down infra -----"
-shutdown_infra
 
 # useful commands
 #kubectl delete po,svc --all
