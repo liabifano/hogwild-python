@@ -57,3 +57,10 @@ def get_category_dict(topics_path):
             else:
                 categories[id].append(cat)
     return categories
+
+def train_val_split(data, targets, val_indices):
+    data_train = [data[x] for x in range(len(targets)) if x not in val_indices]
+    targets_train = [targets[x] for x in range(len(targets)) if x not in val_indices]
+    data_val = [data[x] for x in val_indices]
+    targets_val = [targets[x] for x in val_indices]
+    return data_train, targets_train, data_val, targets_val
