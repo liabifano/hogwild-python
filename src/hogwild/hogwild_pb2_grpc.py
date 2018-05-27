@@ -44,6 +44,11 @@ class HogwildStub(object):
         request_serializer=hogwild__pb2.StopMessage.SerializeToString,
         response_deserializer=hogwild__pb2.Empty.FromString,
         )
+    self.GetLossMessage = channel.unary_unary(
+        '/Hogwild/GetLossMessage',
+        request_serializer=hogwild__pb2.LossMessage.SerializeToString,
+        response_deserializer=hogwild__pb2.Empty.FromString,
+        )
 
 
 class HogwildServicer(object):
@@ -92,6 +97,13 @@ class HogwildServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def GetLossMessage(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_HogwildServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -123,6 +135,11 @@ def add_HogwildServicer_to_server(servicer, server):
       'GetStopMessage': grpc.unary_unary_rpc_method_handler(
           servicer.GetStopMessage,
           request_deserializer=hogwild__pb2.StopMessage.FromString,
+          response_serializer=hogwild__pb2.Empty.SerializeToString,
+      ),
+      'GetLossMessage': grpc.unary_unary_rpc_method_handler(
+          servicer.GetLossMessage,
+          request_deserializer=hogwild__pb2.LossMessage.FromString,
           response_serializer=hogwild__pb2.Empty.SerializeToString,
       ),
   }

@@ -29,9 +29,10 @@ class SVM:
     # TODO: Comment update flag. (if synch, do not update, since then coord would need to not send back specific update)
     def fit(self, data, labels, update=True):
         total_delta_w = {}
-
+        train_loss = 0
         for x, label in zip(data, labels):
-            if self.__misclassification(x, label):
+            xw = dotproduct(x, self.__w)
+            if self.__misclassification(xw, label):
                 delta_w = self.__gradient(x, label)
                 if update:
                     self.update_weights(delta_w)
@@ -44,13 +45,15 @@ class SVM:
                     total_delta_w[k] += v
                 else:
                     total_delta_w[k] = v
-        return total_delta_w
+            train_loss += max(1 - label * xw, 0)
+            train_loss += self.__regularizer(x)
+        return total_delta_w, train_loss
 
     def loss(self, data, labels):
         total_loss = 0
         for x, label in zip(data, labels):
-            wx = dotproduct(x, self.__w)
-            total_loss += max(1 - label * wx, 0)
+            xw = dotproduct(x, self.__w)
+            total_loss += max(1 - label * xw, 0)
             total_loss += self.__regularizer(x)
         return total_loss
 
@@ -70,8 +73,8 @@ class SVM:
         regularizer = self.__regularizer_g(x)
         return {k: regularizer for k in x.keys()}
 
-    def __misclassification(self, x, label):
-        return dotproduct(x, self.__w) * label < 1
+    def __misclassification(self, x_dot_w, label):
+        return x_dot_w * label < 1
 
     def update_weights(self, delta_w):
         for k, v in delta_w.items():
@@ -113,8 +116,8 @@ def svm_subprocess(task_queue, response_queue, val_indices):
             data_stoc = [data_train[x] for x in subset_indices]
             targets_stoc = [targets_train[x] for x in subset_indices]
             # Calculate weight updates
-            total_delta_w = svm.fit(data_stoc, targets_stoc, update=not s.synchronous) # TODO: add train loss term
-            response_queue.put(total_delta_w)
+            total_delta_w, train_loss = svm.fit(data_stoc, targets_stoc, update=not s.synchronous) # TODO: add train loss term
+            response_queue.put({'total_delta_w': total_delta_w, 'train_loss': train_loss})
 
             # TODO: Send train loss to coordinator (with id?)
 

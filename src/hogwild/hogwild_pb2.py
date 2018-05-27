@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hogwild.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\rhogwild.proto\"\x07\n\x05\x45mpty\"W\n\x0bNetworkInfo\x12\x1b\n\x13\x63oordinator_address\x18\x01 \x01(\t\x12\x16\n\x0enode_addresses\x18\x02 \x03(\t\x12\x13\n\x0bval_indices\x18\x03 \x03(\x05\"\xb7\x01\n\x07\x44\x61taSet\x12&\n\ndatapoints\x18\x01 \x03(\x0b\x32\x12.DataSet.DataPoint\x1a\x83\x01\n\tDataPoint\x12\x34\n\tdatapoint\x18\x01 \x03(\x0b\x32!.DataSet.DataPoint.DatapointEntry\x12\x0e\n\x06target\x18\x02 \x01(\x05\x1a\x30\n\x0e\x44\x61tapointEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0e\n\x0cStartMessage\"i\n\x0cWeightUpdate\x12*\n\x07\x64\x65lta_w\x18\x01 \x03(\x0b\x32\x19.WeightUpdate.DeltaWEntry\x1a-\n\x0b\x44\x65ltaWEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0b\n\tReadyToGo\"\x0c\n\nEpochsDone\"\r\n\x0bStopMessage2\xf9\x01\n\x07Hogwild\x12%\n\x0bGetNodeInfo\x12\x0c.NetworkInfo\x1a\x06.Empty\"\x00\x12#\n\x08StartSGD\x12\r.StartMessage\x1a\x06.Empty\"\x00\x12*\n\x0fGetWeightUpdate\x12\r.WeightUpdate\x1a\x06.Empty\"\x00\x12$\n\x0cGetReadyToGo\x12\n.ReadyToGo\x1a\x06.Empty\"\x00\x12&\n\rGetEpochsDone\x12\x0b.EpochsDone\x1a\x06.Empty\"\x00\x12(\n\x0eGetStopMessage\x12\x0c.StopMessage\x1a\x06.Empty\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\rhogwild.proto\"\x07\n\x05\x45mpty\"k\n\x0bNetworkInfo\x12\x1b\n\x13\x63oordinator_address\x18\x01 \x01(\t\x12\x16\n\x0enode_addresses\x18\x02 \x03(\t\x12\x13\n\x0bval_indices\x18\x03 \x03(\x05\x12\x12\n\nworker_idx\x18\x04 \x01(\x05\"\xb7\x01\n\x07\x44\x61taSet\x12&\n\ndatapoints\x18\x01 \x03(\x0b\x32\x12.DataSet.DataPoint\x1a\x83\x01\n\tDataPoint\x12\x34\n\tdatapoint\x18\x01 \x03(\x0b\x32!.DataSet.DataPoint.DatapointEntry\x12\x0e\n\x06target\x18\x02 \x01(\x05\x1a\x30\n\x0e\x44\x61tapointEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"\x0e\n\x0cStartMessage\"i\n\x0cWeightUpdate\x12*\n\x07\x64\x65lta_w\x18\x01 \x03(\x0b\x32\x19.WeightUpdate.DeltaWEntry\x1a-\n\x0b\x44\x65ltaWEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\"B\n\x0bLossMessage\x12\x0c\n\x04loss\x18\x01 \x01(\x02\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x12\n\nworker_idx\x18\x03 \x01(\x05\"\x0b\n\tReadyToGo\"\x0c\n\nEpochsDone\"\r\n\x0bStopMessage2\xa3\x02\n\x07Hogwild\x12%\n\x0bGetNodeInfo\x12\x0c.NetworkInfo\x1a\x06.Empty\"\x00\x12#\n\x08StartSGD\x12\r.StartMessage\x1a\x06.Empty\"\x00\x12*\n\x0fGetWeightUpdate\x12\r.WeightUpdate\x1a\x06.Empty\"\x00\x12$\n\x0cGetReadyToGo\x12\n.ReadyToGo\x1a\x06.Empty\"\x00\x12&\n\rGetEpochsDone\x12\x0b.EpochsDone\x1a\x06.Empty\"\x00\x12(\n\x0eGetStopMessage\x12\x0c.StopMessage\x1a\x06.Empty\"\x00\x12(\n\x0eGetLossMessage\x12\x0c.LossMessage\x1a\x06.Empty\"\x00\x62\x06proto3')
 )
 
 
@@ -77,6 +77,13 @@ _NETWORKINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='worker_idx', full_name='NetworkInfo.worker_idx', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -90,7 +97,7 @@ _NETWORKINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=26,
-  serialized_end=113,
+  serialized_end=133,
 )
 
 
@@ -127,8 +134,8 @@ _DATASET_DATAPOINT_DATAPOINTENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=251,
-  serialized_end=299,
+  serialized_start=271,
+  serialized_end=319,
 )
 
 _DATASET_DATAPOINT = _descriptor.Descriptor(
@@ -164,8 +171,8 @@ _DATASET_DATAPOINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=168,
-  serialized_end=299,
+  serialized_start=188,
+  serialized_end=319,
 )
 
 _DATASET = _descriptor.Descriptor(
@@ -194,8 +201,8 @@ _DATASET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=116,
-  serialized_end=299,
+  serialized_start=136,
+  serialized_end=319,
 )
 
 
@@ -218,8 +225,8 @@ _STARTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=301,
-  serialized_end=315,
+  serialized_start=321,
+  serialized_end=335,
 )
 
 
@@ -256,8 +263,8 @@ _WEIGHTUPDATE_DELTAWENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=377,
-  serialized_end=422,
+  serialized_start=397,
+  serialized_end=442,
 )
 
 _WEIGHTUPDATE = _descriptor.Descriptor(
@@ -286,8 +293,53 @@ _WEIGHTUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=317,
-  serialized_end=422,
+  serialized_start=337,
+  serialized_end=442,
+)
+
+
+_LOSSMESSAGE = _descriptor.Descriptor(
+  name='LossMessage',
+  full_name='LossMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='loss', full_name='LossMessage.loss', index=0,
+      number=1, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='LossMessage.timestamp', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='worker_idx', full_name='LossMessage.worker_idx', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=444,
+  serialized_end=510,
 )
 
 
@@ -310,8 +362,8 @@ _READYTOGO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=424,
-  serialized_end=435,
+  serialized_start=512,
+  serialized_end=523,
 )
 
 
@@ -334,8 +386,8 @@ _EPOCHSDONE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=437,
-  serialized_end=449,
+  serialized_start=525,
+  serialized_end=537,
 )
 
 
@@ -358,8 +410,8 @@ _STOPMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=451,
-  serialized_end=464,
+  serialized_start=539,
+  serialized_end=552,
 )
 
 _DATASET_DATAPOINT_DATAPOINTENTRY.containing_type = _DATASET_DATAPOINT
@@ -373,6 +425,7 @@ DESCRIPTOR.message_types_by_name['NetworkInfo'] = _NETWORKINFO
 DESCRIPTOR.message_types_by_name['DataSet'] = _DATASET
 DESCRIPTOR.message_types_by_name['StartMessage'] = _STARTMESSAGE
 DESCRIPTOR.message_types_by_name['WeightUpdate'] = _WEIGHTUPDATE
+DESCRIPTOR.message_types_by_name['LossMessage'] = _LOSSMESSAGE
 DESCRIPTOR.message_types_by_name['ReadyToGo'] = _READYTOGO
 DESCRIPTOR.message_types_by_name['EpochsDone'] = _EPOCHSDONE
 DESCRIPTOR.message_types_by_name['StopMessage'] = _STOPMESSAGE
@@ -437,6 +490,13 @@ WeightUpdate = _reflection.GeneratedProtocolMessageType('WeightUpdate', (_messag
 _sym_db.RegisterMessage(WeightUpdate)
 _sym_db.RegisterMessage(WeightUpdate.DeltaWEntry)
 
+LossMessage = _reflection.GeneratedProtocolMessageType('LossMessage', (_message.Message,), dict(
+  DESCRIPTOR = _LOSSMESSAGE,
+  __module__ = 'hogwild_pb2'
+  # @@protoc_insertion_point(class_scope:LossMessage)
+  ))
+_sym_db.RegisterMessage(LossMessage)
+
 ReadyToGo = _reflection.GeneratedProtocolMessageType('ReadyToGo', (_message.Message,), dict(
   DESCRIPTOR = _READYTOGO,
   __module__ = 'hogwild_pb2'
@@ -470,8 +530,8 @@ _HOGWILD = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=467,
-  serialized_end=716,
+  serialized_start=555,
+  serialized_end=846,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetNodeInfo',
@@ -524,6 +584,15 @@ _HOGWILD = _descriptor.ServiceDescriptor(
     index=5,
     containing_service=None,
     input_type=_STOPMESSAGE,
+    output_type=_EMPTY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetLossMessage',
+    full_name='Hogwild.GetLossMessage',
+    index=6,
+    containing_service=None,
+    input_type=_LOSSMESSAGE,
     output_type=_EMPTY,
     options=None,
   ),

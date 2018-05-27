@@ -1,6 +1,7 @@
 import grpc
 from threading import Lock
 from hogwild import hogwild_pb2, hogwild_pb2_grpc
+from datetime import datetime
 
 
 # Create a class to define the server functions
@@ -12,6 +13,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.stubs = {}
 
         self.val_indices = []
+        self.train_losses = []
 
         self.nodeinfo_received = False
         self.ready_to_calculate = False
@@ -28,6 +30,7 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
         self.coordinator_address = request.coordinator_address
         self.node_addresses = request.node_addresses
         self.val_indices = request.val_indices
+        self.worker_idx = request.worker_idx
         print('Coordinator at {}'.format(self.coordinator_address))
         print('Other nodes at {}'.format(self.node_addresses))
         # TODO: Remove it when it is asyncronous. But fix it in the epochs_done
@@ -67,5 +70,13 @@ class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
 
     def GetStopMessage(self, request, context):
         self.stop_msg_received = True
+        response = hogwild_pb2.Empty()
+        return response
+
+    def GetLossMessage(self, request, context):
+        loss_log = {'worker_idx': request.worker_idx,
+                    'loss_train': request.loss,
+                    'time': request.timestamp}
+        self.train_losses.append(loss_log)
         response = hogwild_pb2.Empty()
         return response
