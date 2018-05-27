@@ -142,12 +142,9 @@ if __name__ == '__main__':
                                                             train=False)
 
         ### TEMP
-        print('read_data')
         # Calculate the predictions on the validation set
         task_queue.put({'type': 'predict', 'values': data_test})
         prediction = response_queue.get()
-        #response_queue.task_done()
-        print('queues closed')
 
         a = sum([1 for x in zip(targets_test, prediction) if x[0] == 1 and x[1] == 1])
         b = sum([1 for x in targets_test if x == 1])

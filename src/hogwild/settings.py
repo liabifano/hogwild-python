@@ -30,7 +30,7 @@ synchronous = running_mode == 'synchronous'
 
 learning_rate = 0.03 / len(worker_addresses)  # Learning rate for SGD
 validation_split = 0.1  # Percentage of validation data
-epochs = 100  # Number of training iterations over subset on each node
+epochs = 10000  # Number of training iterations over subset on each node
 persistence = 15  # Abort if after so many epochs learning rate does not decrease
 subset_size = 100  # Number of datapoints to train on each epoch
 lambda_reg = 1e-5  # Regularization parameter
