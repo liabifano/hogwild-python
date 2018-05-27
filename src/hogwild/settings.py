@@ -12,9 +12,9 @@ N_WORKERS = os.environ.get('N_WORKERS')
 
 
 coordinator_address = 'coordinator-0.coordinator-service:80' if RUNNING_WHERE != 'local' else 'localhost:50051'
-node_addresses = ['worker-{}.workers-service:80'.format(str(x)) for x in
-                  range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
-                                                                           'localhost:50054', 'localhost:50055']
+worker_addresses = ['worker-{}.workers-service:80'.format(str(x)) for x in
+                    range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
+                                                                             'localhost:50054', 'localhost:50055']
 
 port = 80 if RUNNING_WHERE != 'local' else 50051
 
