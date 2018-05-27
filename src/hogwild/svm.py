@@ -47,7 +47,7 @@ class SVM:
                     total_delta_w[k] = v
             train_loss += max(1 - label * xw, 0)
             train_loss += self.__regularizer(x)
-        return total_delta_w, train_loss
+        return total_delta_w, train_loss / len(labels)
 
     def loss(self, data, labels):
         total_loss = 0
@@ -55,7 +55,7 @@ class SVM:
             xw = dotproduct(x, self.__w)
             total_loss += max(1 - label * xw, 0)
             total_loss += self.__regularizer(x)
-        return total_loss
+        return total_loss / len(labels)
 
     def __regularizer(self, x):
         w = self.__getW()

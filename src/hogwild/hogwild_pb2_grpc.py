@@ -14,8 +14,8 @@ class HogwildStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.GetNodeInfo = channel.unary_unary(
-        '/Hogwild/GetNodeInfo',
+    self.GetWorkerInfo = channel.unary_unary(
+        '/Hogwild/GetWorkerInfo',
         request_serializer=hogwild__pb2.NetworkInfo.SerializeToString,
         response_deserializer=hogwild__pb2.Empty.FromString,
         )
@@ -55,7 +55,7 @@ class HogwildServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
-  def GetNodeInfo(self, request, context):
+  def GetWorkerInfo(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -107,8 +107,8 @@ class HogwildServicer(object):
 
 def add_HogwildServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'GetNodeInfo': grpc.unary_unary_rpc_method_handler(
-          servicer.GetNodeInfo,
+      'GetWorkerInfo': grpc.unary_unary_rpc_method_handler(
+          servicer.GetWorkerInfo,
           request_deserializer=hogwild__pb2.NetworkInfo.FromString,
           response_serializer=hogwild__pb2.Empty.SerializeToString,
       ),

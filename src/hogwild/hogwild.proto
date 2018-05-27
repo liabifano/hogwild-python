@@ -3,10 +3,9 @@ syntax = "proto3";
 message Empty {}
 
 message NetworkInfo {
-    string coordinator_address = 1;
-    repeated string node_addresses = 2;
-    repeated int32 val_indices = 3;
-    int32 worker_idx = 4;
+    repeated string other_workers = 1;
+    repeated int32 val_indices = 2;
+    int32 worker_idx = 3;
 }
 
 message DataSet {
@@ -36,7 +35,7 @@ message EpochsDone {}
 message StopMessage {}
 
 service Hogwild {
-    rpc GetNodeInfo (NetworkInfo) returns (Empty) {}
+    rpc GetWorkerInfo (NetworkInfo) returns (Empty) {}
     rpc StartSGD (StartMessage) returns (Empty) {}
     rpc GetWeightUpdate (WeightUpdate) returns (Empty) {}
     rpc GetReadyToGo (ReadyToGo) returns (Empty) {}
