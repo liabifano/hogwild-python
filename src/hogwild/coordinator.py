@@ -144,29 +144,29 @@ if __name__ == '__main__':
 
         ### TEMP
 
-        data, targets = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
+        data_test, targets_test = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
                                                             s.TOPICS_FILE,
                                                             s.TEST_FILES,
                                                             selected_cat='CCAT',
-                                                            train=True)
-        data_val = [data[x] for x in val_indices]
-        targets_val = [targets[x] for x in val_indices]
+                                                            train=False)
+        # data_val = [data[x] for x in val_indices]
+        # targets_val = [targets[x] for x in val_indices]
 
         ### TEMP
 
         # Calculate the predictions on the validation set
-        task_queue.put({'type': 'predict', 'values': data_val})
+        task_queue.put({'type': 'predict', 'values': data_test})
         prediction = response_queue.get()
         #response_queue.task_done()
 
-        a = sum([1 for x in zip(targets_val, prediction) if x[0] == 1 and x[1] == 1])
-        b = sum([1 for x in targets_val if x == 1])
+        a = sum([1 for x in zip(targets_test, prediction) if x[0] == 1 and x[1] == 1])
+        b = sum([1 for x in targets_test if x == 1])
         print('Val accuracy of Label 1: {:.2f}%'.format(a / b))
 
-        c = sum([1 for x in zip(targets_val, prediction) if x[0] == -1 and x[1] == -1])
-        d = sum([1 for x in targets_val if x == -1])
+        c = sum([1 for x in zip(targets_test, prediction) if x[0] == -1 and x[1] == -1])
+        d = sum([1 for x in targets_test if x == -1])
         print('Val accuracy of Label -1: {:.2f}%'.format(c / d))
-        print('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_val, prediction)))
+        print('Val accuracy: {:.2f}%'.format(utils.accuracy(targets_test, prediction)))
 
         t1 = time()
 
@@ -175,7 +175,7 @@ if __name__ == '__main__':
                 'running_time': t1 - t0,
                 'n_workers': s.N_WORKERS,
                 'running_mode': s.running_mode,
-                'accuracy': utils.accuracy(targets_val, prediction),
+                'accuracy': utils.accuracy(targets_test, prediction),
                 'accuracy_1': a / b,
                 'accuracy_-1': c / d,
                 'losses_val': losses_val,

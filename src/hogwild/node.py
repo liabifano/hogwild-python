@@ -16,10 +16,7 @@ import json
 
 if __name__ == "__main__":
     # Create a gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), \
-                         options=[('grpc.max_message_length', 1024 * 1024 * 1024), \
-                                  ('grpc.max_send_message_length', 1024 * 1024 * 1024), \
-                                  ('grpc.max_receive_message_length', 1024 * 1024 * 1024)])
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # Use the generated function `add_HogwildServicer_to_server`
     # to add the defined class to the created server
