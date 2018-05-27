@@ -13,7 +13,7 @@ from time import time, sleep
 
 
 if __name__ == '__main__':
-    from time import sleep
+    from time import sleep;
     # sleep(100000)
     # Step 1: Load the data from the reuters dataset and create targets
     print('Data path:', s.TRAIN_FILE)
@@ -142,6 +142,7 @@ if __name__ == '__main__':
         print('All SGD epochs done!')
 
         # IF ASYNC, flush the weight buffer one last time
+        print('update_weights')
         if not s.synchronous:
             task_queue.put({'type': 'update_weights',
                             'all_delta_w': hws.all_delta_w})
@@ -150,20 +151,20 @@ if __name__ == '__main__':
 
         ### TEMP
 
+        print('reading data')
         data_test, targets_test = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
                                                             s.TOPICS_FILE,
                                                             s.TEST_FILES,
                                                             selected_cat='CCAT',
                                                             train=False)
-        # data_val = [data[x] for x in val_indices]
-        # targets_val = [targets[x] for x in val_indices]
 
         ### TEMP
-
+        print('read_data')
         # Calculate the predictions on the validation set
         task_queue.put({'type': 'predict', 'values': data_test})
         prediction = response_queue.get()
         #response_queue.task_done()
+        print('queues closed')
 
         a = sum([1 for x in zip(targets_test, prediction) if x[0] == 1 and x[1] == 1])
         b = sum([1 for x in targets_test if x == 1])

@@ -25,19 +25,19 @@ fi;
 
 
 function shutdown_infra {
-    if ! [[ -z $(kubectl get services | grep coordinator-service-lia) ]];
+    if ! [[ -z $(kubectl get services | grep coordinator-service) ]];
     then
         kubectl delete -f Kubernetes/coordinator.yaml --cascade=true
     fi;
 
-    if ! [[ -z $(kubectl get services | grep workers-service-lia) ]];
+    if ! [[ -z $(kubectl get services | grep workers-service) ]];
     then
         kubectl delete -f Kubernetes/workers.yaml --cascade=true
     fi;
 
-    if ! [[ -z $(kubectl get configmap | grep hogwild-config-lia) ]];
+    if ! [[ -z $(kubectl get configmap | grep hogwild-config) ]];
     then
-        kubectl delete configmap hogwild-config-lia
+        kubectl delete configmap hogwild-config
     fi;
 }
 
@@ -45,16 +45,27 @@ echo
 echo "----- Logging in Docker Hub -----"
 docker login --username=$DOCKER_USER --password=$DOCKER_PASS 2> /dev/null
 
+
+
 echo
 echo "----- Deleting remaining infra -----"
 shutdown_infra
 
 echo
+echo "----- Building and Pushing docker to Docker Hub -----"
+
+
+echo
+echo
+#echo "----- Starting Monitoring -----"
+#bash monitor-it.sh &
+
+echo
 echo "----- Starting workers -----"
-kubectl create configmap hogwild-config-lia --from-literal=replicas=${N_WORKERS} \
-                                            --from-literal=running_mode=${RUNNING_MODE} \
-                                            --from-literal=data_path=${DATA_PATH} \
-                                            --from-literal=running_where=${WHERE}
+kubectl create configmap hogwild-config --from-literal=replicas=${N_WORKERS} \
+                                        --from-literal=running_mode=${RUNNING_MODE} \
+                                        --from-literal=data_path=${DATA_PATH} \
+                                        --from-literal=running_where=${WHERE}
 sed "s/\(replicas:\)\(.*\)/\1 ${N_WORKERS}/" Kubernetes/workers_template.yaml > Kubernetes/workers.yaml
 kubectl create -f Kubernetes/workers.yaml
 

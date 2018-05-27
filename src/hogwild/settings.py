@@ -14,8 +14,8 @@ print(DATA_PATH)
 N_WORKERS = os.environ.get('N_WORKERS')
 print(N_WORKERS)
 
-coordinator_address = 'coordinator-roman-0.coordinator-service-roman:80' if RUNNING_WHERE != 'local' else 'localhost:50051'
-node_addresses = ['worker-roman-{}.workers-service-roman:80'.format(str(x)) for x in
+coordinator_address = 'coordinator-0.coordinator-service:80' if RUNNING_WHERE != 'local' else 'localhost:50051'
+node_addresses = ['worker-{}.workers-service:80'.format(str(x)) for x in
                   range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
                                                                            'localhost:50054', 'localhost:50055']
                                                                            # 'localhost:50056', 'localhost:50057',

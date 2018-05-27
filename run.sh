@@ -51,8 +51,8 @@ shutdown_infra
 
 echo
 echo "----- Building and Pushing docker to Docker Hub -----"
-docker build -f `pwd`/Docker/Dockerfile `pwd` -t ${REPO}/${APP_NAME}
-docker push ${REPO}/${APP_NAME}
+#docker build -f `pwd`/Docker/Dockerfile `pwd` -t ${REPO}/${APP_NAME}
+#docker push ${REPO}/${APP_NAME}
 
 echo
 echo
