@@ -8,13 +8,13 @@ LOCAL_PATH = os.path.join((os.sep)
 # When running on different machines, can use the same port for all.
 RUNNING_WHERE = os.environ.get('WHERE') if os.environ.get('WHERE') == 'cluster' else 'local'
 DATA_PATH = os.environ.get('DATA_PATH') if os.environ.get('DATA_PATH') else LOCAL_PATH
-N_WORKERS = os.environ.get('N_WORKERS')
 
 
 coordinator_address = 'coordinator-0.coordinator-service:80' if RUNNING_WHERE != 'local' else 'localhost:50051'
 worker_addresses = ['worker-{}.workers-service:80'.format(str(x)) for x in
                     range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
                                                                              'localhost:50054', 'localhost:50055']
+N_WORKERS = os.environ.get('N_WORKERS') if os.environ.get('N_WORKERS') else len(worker_addresses)
 
 port = 80 if RUNNING_WHERE != 'local' else 50051
 
