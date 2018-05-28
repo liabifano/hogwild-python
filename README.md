@@ -2,28 +2,6 @@
 
 [HOGWILD!](https://arxiv.org/abs/1106.5730)
 
-The implementation consists in one coordinator and `n` working nodes. 
-As the dataset is constant, fits in the node memory and it will be required to be accessed by all the nodes multiple times (for each epoch), it will be sent to every node in the beginning of the job.
-We define an epoch as one iteration of SGD over a random subsample of the dataset.
-
-For now, the responsibilities of coordinator node are:
-1. Split dataset in train / test
-2. Send to the nodes the entire train dataset and all nodes addresses 
-3. Listen intermediate result of working nodes
-4. After the working nodes' job is completed, will aggregate the weight updates and calculate the model's performance in the test dataset.
-
-The responsibilities of the working nodes are:
-1. Receive the dataset and send message to all others nodes and to coordinator that its is ready to start the computations.
-2. Wait until all others nodes are ready to start the computations
-3. Performance one `epoch` of computation
-4. Send to all others nodes the result and that it is ready to start another `epoch`
-5. Wait until all others nodes are ready to start another `epoch`
-6. Send a message to the coordinator stating that all epochs are done
-
-In summary:
-
-![stack](/resources/temp_schema_comunication.JPG)
-
 ## Configurations and setup
 To build the python environment and activate it run: 
 ```bash
@@ -56,6 +34,6 @@ and it will spin 4 workers in our local machine.
 
 ##### To run in the cluster:
 ```bash
-bash run.sh -n 3 -w synchronous -w cluster
+bash run.sh -n 3 -r synchronous -w cluster
 ```
 and it will spin 3 workers in Kubernetes cluster. Don't forget the change the variables `KUBER_LOGIN` and docker hub user / password inside the script before to run. 

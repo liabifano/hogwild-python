@@ -6,6 +6,7 @@ LOCAL_PATH = os.path.join((os.sep)
 
 # If testing locally, use localhost:port with different ports for each node/coordinator
 # When running on different machines, can use the same port for all.
+N_WORKERS = os.environ.get('N_WORKERS')
 RUNNING_WHERE = os.environ.get('WHERE') if os.environ.get('WHERE') == 'cluster' else 'local'
 DATA_PATH = os.environ.get('DATA_PATH') if os.environ.get('DATA_PATH') else LOCAL_PATH
 
@@ -14,7 +15,6 @@ coordinator_address = 'coordinator-0.coordinator-service:80' if RUNNING_WHERE !=
 worker_addresses = ['worker-{}.workers-service:80'.format(str(x)) for x in
                     range(int(N_WORKERS))] if RUNNING_WHERE != 'local' else ['localhost:50052', 'localhost:50053',
                                                                              'localhost:50054', 'localhost:50055']
-N_WORKERS = os.environ.get('N_WORKERS') if os.environ.get('N_WORKERS') else len(worker_addresses)
 
 port = 80 if RUNNING_WHERE != 'local' else 50051
 
@@ -28,9 +28,9 @@ TEST_FILES = [os.path.join(DATA_PATH, x) for x in ['lyrl2004_vectors_test_pt0.da
 running_mode = os.environ.get('RUNNING_MODE') if os.environ.get('RUNNING_MODE') else 'synchronous'
 synchronous = running_mode == 'synchronous'
 
-learning_rate = 0.03 / len(worker_addresses)  # Learning rate for SGD
-validation_split = 0.1  # Percentage of validation data
-epochs = 2000  # Number of training iterations over subset on each node
-persistence = 25  # Abort if after so many epochs learning rate does not decrease
 subset_size = 100  # Number of datapoints to train on each epoch
+learning_rate = 0.03 * (100 / subset_size) / len(worker_addresses)  # Learning rate for SGD
+validation_split = 0.1  # Percentage of validation data
+epochs = 1000  # Number of training iterations over subset on each node
+persistence = 15  # Abort if after so many epochs learning rate does not decrease
 lambda_reg = 1e-5  # Regularization parameter

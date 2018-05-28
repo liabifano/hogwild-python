@@ -1,14 +1,13 @@
-import grpc
 import sys
-from concurrent import futures
-import settings as s
 import multiprocessing
-from hogwild import hogwild_pb2, hogwild_pb2_grpc
-from hogwild.HogwildServicer import HogwildServicer, create_servicer
+import sys
+from datetime import datetime
+from hogwild import hogwild_pb2
+from hogwild.HogwildServicer import create_servicer
 from hogwild.svm import svm_subprocess
 from time import time
-from datetime import datetime
 
+import settings as s
 
 if __name__ == "__main__":
     # Create a gRPC server and HogwildServicer
