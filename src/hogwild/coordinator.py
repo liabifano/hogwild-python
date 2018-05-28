@@ -123,7 +123,6 @@ if __name__ == '__main__':
                     response = stub.GetStopMessage(stop_msg)
 
         # IF ASYNC, flush the weight buffer one last time
-        print('update_weights')
         if not s.synchronous:
             task_queue.put({'type': 'update_weights',
                             'all_delta_w': hws.all_delta_w})
@@ -132,14 +131,12 @@ if __name__ == '__main__':
         print('All SGD epochs done!')
 
         ### Calculating final accuracies on train, validation and test sets ###
-        print('reading data')
         data_test, targets_test = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
                                                                       s.TOPICS_FILE,
                                                                       s.TEST_FILES,
                                                                       selected_cat='CCAT',
                                                                       train=False)
 
-        ### TEMP
         # Calculate the predictions on the validation set
         task_queue.put({'type': 'predict', 'values': data_test})
         prediction = response_queue.get()
@@ -220,10 +217,6 @@ if __name__ == '__main__':
         response_queue.close()
         response_queue.join_thread()
         svm_proc.join()
-
-        from time import sleep;
-
-        sleep(100000000)
 
     except KeyboardInterrupt:
         server.stop(0)

@@ -23,8 +23,11 @@ class SVM:
     def __getW(self):
         return self.__w
 
-    # TODO: Comment update flag. (if synch, do not update, since then coord would need to not send back specific update)
     def fit(self, data, labels, update=True):
+        '''
+        Calculates the gradient and train loss.
+        If the update flag is set to False, gradient is calculated but own weights will not be updated
+        '''
         total_delta_w = {}
         train_loss = 0
         for x, label in zip(data, labels):
@@ -47,6 +50,7 @@ class SVM:
         return total_delta_w, train_loss / len(labels)
 
     def loss(self, data, labels):
+        ''' Returns the MSE loss of the data with the true labels. '''
         total_loss = 0
         for x, label in zip(data, labels):
             xw = dotproduct(x, self.__w)
@@ -55,33 +59,41 @@ class SVM:
         return total_loss / len(labels)
 
     def __regularizer(self, x):
+        ''' Returns the regularization term '''
         w = self.__getW()
         return self.__getRegLambda() * sum([w[i] ** 2 for i in x.keys()]) / len(x)
 
     def __regularizer_g(self, x):
+        '''Returns the gradient of the regularization term  '''
         w = self.__getW()
         return 2 * self.__getRegLambda() * sum([w[i] for i in x.keys()]) / len(x)
 
     def __gradient(self, x, label):
+        ''' Returns the gradient of the loss with respect to the weights '''
         regularizer = self.__regularizer_g(x)
         return {k: (v * label - regularizer) for k, v in x.items()}
 
     def __regularization_gradient(self, x):
+        ''' Returns the gradient of the regularization term for each datapoint '''
         regularizer = self.__regularizer_g(x)
         return {k: regularizer for k in x.keys()}
 
     def __misclassification(self, x_dot_w, label):
+        ''' Returns true if x is misclassified. '''
         return x_dot_w * label < 1
 
     def update_weights(self, delta_w):
+        ''' Update the SVM weights with the given weight delta dictionary '''
         for k, v in delta_w.items():
             self.__w[k] += self.__getLearningRate() * v
 
     def predict(self, data):
+        ''' Predict the labels of the input data '''
         return [sign(dotproduct(x, self.__w)) for x in data]
 
 
 def svm_subprocess(task_queue, response_queue, val_indices):
+    ''' Support vector machine subprocess used by the coordinator and workers. '''
     print('Loading training data')
     data, targets = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
                                                         s.TOPICS_FILE,
@@ -105,7 +117,7 @@ def svm_subprocess(task_queue, response_queue, val_indices):
             print('SVM subprocess got poison pill. Exiting from subprocess.')
             break
 
-        # Tasks are dictionaries: {'type': 'foo', 'payload': bar}
+        # Tasks are dictionaries: {'type': 'foo', ...}
         task_type = next_task['type']
         if task_type == 'calculate_svm_update':
             # Select random subset
@@ -114,19 +126,15 @@ def svm_subprocess(task_queue, response_queue, val_indices):
             targets_stoc = [targets_train[x] for x in subset_indices]
             # Calculate weight updates
             total_delta_w, train_loss = svm.fit(data_stoc, targets_stoc,
-                                                update=not s.synchronous)  # TODO: add train loss term
+                                                update=not s.synchronous)
             response_queue.put({'total_delta_w': total_delta_w, 'train_loss': train_loss})
-
-            # TODO: Send train loss to coordinator (with id?)
 
         elif task_type == 'update_weights':
             svm.update_weights(next_task['all_delta_w'])
 
-
         elif task_type == 'calculate_val_loss':
             val_loss = svm.loss(data_val, targets_val)
             response_queue.put(val_loss)
-
 
         elif task_type == 'predict':
             values = next_task['values']

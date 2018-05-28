@@ -10,7 +10,7 @@ def create_servicer(port):
     Creates a gRPC server and HogwildServicer
     '''
     # Create a gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) # TODO: Increase max_workers?
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # Use the generated function `add_HogwildServicer_to_server`
     # to add the defined class to the created server
@@ -24,9 +24,11 @@ def create_servicer(port):
     return hws, server
 
 
-# Create a class to define the server functions
-# derived from hogwild_pb2_grpc.HogwildServicer
 class HogwildServicer(hogwild_pb2_grpc.HogwildServicer):
+    '''
+    Class used to define the server functions, derived from
+    hogwild_pb2_grpc.HogwildServicer
+    '''
     def __init__(self):
         self.other_workers = []
         self.stubs = {}
