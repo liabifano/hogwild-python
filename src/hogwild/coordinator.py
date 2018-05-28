@@ -1,13 +1,12 @@
 import grpc
 import json
-import random
 import multiprocessing
-from concurrent import futures
+import random
 from datetime import datetime
 from hogwild import hogwild_pb2, hogwild_pb2_grpc, ingest_data
 from hogwild import settings as s
 from hogwild.EarlyStopping import EarlyStopping
-from hogwild.HogwildServicer import HogwildServicer, create_servicer
+from hogwild.HogwildServicer import create_servicer
 from hogwild.svm import svm_subprocess
 from hogwild.utils import calculate_accs
 from time import time
@@ -35,7 +34,7 @@ if __name__ == '__main__':
     dataset_size = sum(1 for line in open(s.TRAIN_FILE))
     val_indices = random.sample(range(dataset_size), int(s.validation_split * dataset_size))
     print('Data set size: {}, Train set size: {}, Validation set size: {}'.format(dataset_size,
-                                                                                  dataset_size-len(val_indices),
+                                                                                  dataset_size - len(val_indices),
                                                                                   len(val_indices)))
 
     # Step 2: Open connections to all workers
@@ -132,14 +131,13 @@ if __name__ == '__main__':
         end_time = time()
         print('All SGD epochs done!')
 
-
         ### Calculating final accuracies on train, validation and test sets ###
         print('reading data')
         data_test, targets_test = ingest_data.load_large_reuters_data(s.TRAIN_FILE,
-                                                            s.TOPICS_FILE,
-                                                            s.TEST_FILES,
-                                                            selected_cat='CCAT',
-                                                            train=False)
+                                                                      s.TOPICS_FILE,
+                                                                      s.TEST_FILES,
+                                                                      selected_cat='CCAT',
+                                                                      train=False)
 
         ### TEMP
         # Calculate the predictions on the validation set
@@ -191,14 +189,13 @@ if __name__ == '__main__':
         print('Test accuracy of Label -1: {:.2f}%'.format(acc_neg_test))
         print('Test accuracy: {:.2f}%'.format(acc_tot_test))
 
-
         # Save results in a log
         log = [{'start_time': datetime.utcfromtimestamp(start_time).strftime("%Y-%m-%d %H:%M:%S.%f"),
                 'end_time': datetime.utcfromtimestamp(end_time).strftime("%Y-%m-%d %H:%M:%S.%f"),
                 'running_time': end_time - start_time,
                 'n_workers': s.N_WORKERS,
                 'running_mode': s.running_mode,
-                'sync_epochs': n_epochs-1,
+                'sync_epochs': n_epochs - 1,
                 'accuracy_train': acc_tot_train,
                 'accuracy_1_train': acc_pos_train,
                 'accuracy_-1_train': acc_neg_train,
@@ -223,6 +220,10 @@ if __name__ == '__main__':
         response_queue.close()
         response_queue.join_thread()
         svm_proc.join()
+
+        from time import sleep;
+
+        sleep(100000000)
 
     except KeyboardInterrupt:
         server.stop(0)

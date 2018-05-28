@@ -1,10 +1,7 @@
-from hogwild.utils import dotproduct, sign
-from hogwild import ingest_data
-import multiprocessing
 import random
+from hogwild import ingest_data
 from hogwild import settings as s
-from hogwild import hogwild_pb2, hogwild_pb2_grpc
-import grpc
+from hogwild.utils import dotproduct, sign
 
 
 class SVM:
@@ -59,7 +56,7 @@ class SVM:
 
     def __regularizer(self, x):
         w = self.__getW()
-        return self.__getRegLambda() * sum([w[i]**2 for i in x.keys()]) / len(x)
+        return self.__getRegLambda() * sum([w[i] ** 2 for i in x.keys()]) / len(x)
 
     def __regularizer_g(self, x):
         w = self.__getW()
@@ -116,7 +113,8 @@ def svm_subprocess(task_queue, response_queue, val_indices):
             data_stoc = [data_train[x] for x in subset_indices]
             targets_stoc = [targets_train[x] for x in subset_indices]
             # Calculate weight updates
-            total_delta_w, train_loss = svm.fit(data_stoc, targets_stoc, update=not s.synchronous) # TODO: add train loss term
+            total_delta_w, train_loss = svm.fit(data_stoc, targets_stoc,
+                                                update=not s.synchronous)  # TODO: add train loss term
             response_queue.put({'total_delta_w': total_delta_w, 'train_loss': train_loss})
 
             # TODO: Send train loss to coordinator (with id?)
